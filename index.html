@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HireOS — Career Navigation</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0a;
+    --surface: #111111;
+    --surface2: #1a1a1a;
+    --border: #2a2a2a;
+    --border2: #333;
+    --text: #f0ede8;
+    --muted: #888;
+    --accent: #e8c547;
+    --accent2: #c8a832;
+    --danger: #e85547;
+    --success: #47c87a;
+    --user-bubble: #1e2a1e;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* HEADER */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 1.5rem;
+    height: 52px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .logo {
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    letter-spacing: -0.5px;
+  }
+  .logo span { color: var(--accent); }
+
+  .stage-indicator {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .stage-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--border2);
+    transition: background 0.3s;
+  }
+  .stage-dot.active { background: var(--accent); }
+  .stage-dot.done { background: var(--success); }
+  .stage-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-left: 6px;
+  }
+
+  /* PROGRESS */
+  .progress-bar { height: 2px; background: var(--border); flex-shrink: 0; }
+  .progress-fill { height: 100%; background: var(--accent); transition: width 0.5s ease; width: 0%; }
+
+  /* MAIN */
+  main { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+  .screen { display: none; flex-direction: column; height: 100%; }
+  .screen.active { display: flex; }
+
+  /* UPLOAD SCREEN */
+  #screen-upload {
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+  .upload-inner {
+    max-width: 500px;
+    width: 100%;
+    text-align: center;
+  }
+  .upload-inner h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: clamp(36px, 6vw, 58px);
+    font-weight: 400;
+    line-height: 1.1;
+    letter-spacing: -1px;
+    margin-bottom: 1rem;
+  }
+  .upload-inner h1 em { font-style: italic; color: var(--accent); }
+  .upload-inner > p {
+    font-size: 15px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 2.5rem;
+  }
+  .upload-zone {
+    border: 1.5px dashed var(--border2);
+    border-radius: 12px;
+    padding: 2.5rem 2rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: var(--surface);
+    margin-bottom: 1rem;
+  }
+  .upload-zone:hover, .upload-zone.drag {
+    border-color: var(--accent);
+    background: #141200;
+  }
+  .upload-icon { font-size: 32px; margin-bottom: 0.75rem; display: block; }
+  .upload-zone h3 { font-size: 15px; font-weight: 500; margin-bottom: 4px; }
+  .upload-zone p { font-size: 13px; color: var(--muted); margin: 0; }
+  #cv-file-input { display: none; }
+
+  .file-selected {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    margin-bottom: 1rem;
+    text-align: left;
+  }
+  .file-selected.show { display: flex; }
+  .file-name { font-size: 14px; font-weight: 500; flex: 1; }
+  .file-size { font-size: 12px; color: var(--muted); }
+
+  .btn-primary {
+    width: 100%;
+    padding: 14px 24px;
+    background: var(--accent);
+    color: #0a0a0a;
+    border: none;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+  }
+  .btn-primary:hover { background: var(--accent2); }
+  .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .skip-link {
+    display: block;
+    margin-top: 1rem;
+    font-size: 13px;
+    color: var(--muted);
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .skip-link:hover { color: var(--text); }
+
+  /* CHAT SCREEN */
+  .chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    scroll-behavior: smooth;
+  }
+  .chat-messages::-webkit-scrollbar { width: 4px; }
+  .chat-messages::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+  .msg {
+    display: flex;
+    gap: 10px;
+    animation: fadeUp 0.3s ease;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .msg.user { align-self: flex-end; flex-direction: row-reverse; max-width: 85%; }
+  .msg.ai { align-self: flex-start; max-width: 85%; }
+
+  .msg-avatar {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+    margin-top: 2px;
+    font-weight: 500;
+  }
+  .msg.ai .msg-avatar { background: var(--accent); color: #0a0a0a; }
+  .msg.user .msg-avatar { background: var(--surface2); color: var(--muted); border: 1px solid var(--border2); }
+
+  .msg-bubble {
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 14px;
+    line-height: 1.75;
+  }
+  .msg.ai .msg-bubble {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px 12px 12px 12px;
+  }
+  .msg.user .msg-bubble {
+    background: var(--user-bubble);
+    border: 1px solid #2a3a2a;
+    border-radius: 12px 4px 12px 12px;
+  }
+  .msg-bubble strong { color: var(--accent); font-weight: 500; }
+
+  /* TYPING */
+  .typing-indicator { display: none; align-items: center; gap: 10px; }
+  .typing-indicator.show { display: flex; }
+  .typing-avatar {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: var(--accent); color: #0a0a0a;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; font-weight: 500; flex-shrink: 0;
+  }
+  .typing-dots {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px 12px 12px 12px;
+    padding: 12px 16px;
+    display: flex; gap: 4px; align-items: center;
+  }
+  .typing-dots span {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--muted);
+    animation: bounce 1.2s infinite;
+  }
+  .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-4px); opacity: 1; }
+  }
+
+  /* INPUT */
+  .chat-input-area {
+    border-top: 1px solid var(--border);
+    padding: 1rem 1.5rem;
+    flex-shrink: 0;
+  }
+  .input-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  #user-input {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 12px 16px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    resize: none;
+    min-height: 48px;
+    max-height: 140px;
+    line-height: 1.5;
+    transition: border-color 0.2s;
+  }
+  #user-input:focus { outline: none; border-color: var(--accent); }
+  #user-input::placeholder { color: var(--muted); }
+  #send-btn {
+    width: 44px; height: 44px;
+    background: var(--accent);
+    border: none; border-radius: 10px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    color: #0a0a0a;
+    font-size: 18px;
+  }
+  #send-btn:hover { background: var(--accent2); }
+  #send-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+  .input-hint {
+    text-align: center;
+    margin-top: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--border2);
+    letter-spacing: 0.05em;
+  }
+
+  /* PROFILE SCREEN */
+  #screen-profile { overflow-y: auto; padding: 2rem; }
+  #screen-profile::-webkit-scrollbar { width: 4px; }
+  #screen-profile::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+  .profile-inner { max-width: 680px; margin: 0 auto; }
+
+  .profile-header {
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .profile-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--accent);
+    margin-bottom: 0.75rem;
+  }
+  .profile-header h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 34px; font-weight: 400;
+    letter-spacing: -0.5px; margin-bottom: 0.5rem;
+  }
+  .profile-header p { font-size: 13px; color: var(--muted); }
+
+  .profile-section {
+    margin-bottom: 1.25rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .ps-header {
+    padding: 0.875rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  .ps-icon { font-size: 15px; }
+  .ps-title {
+    font-size: 11px; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 0.08em;
+    font-family: 'DM Mono', monospace; color: var(--muted);
+  }
+  .ps-body { padding: 1.25rem; }
+  .ps-body p { font-size: 14px; line-height: 1.7; margin-bottom: 0.75rem; }
+  .ps-body p:last-child { margin-bottom: 0; }
+
+  .target-role-card {
+    background: linear-gradient(135deg, #1a1800 0%, #111 100%);
+    border: 1px solid var(--accent);
+    border-radius: 8px;
+    padding: 1.25rem;
+    margin-bottom: 1rem;
+  }
+  .target-role-title {
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px; color: var(--accent); margin-bottom: 4px;
+  }
+  .target-role-sub { font-size: 13px; color: var(--muted); }
+
+  .salary-display {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--border);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 1rem;
+  }
+  .salary-cell { background: var(--surface2); padding: 1rem; text-align: center; }
+  .salary-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px; letter-spacing: 0.1em;
+    color: var(--muted); text-transform: uppercase; margin-bottom: 4px;
+  }
+  .salary-value {
+    font-family: 'Instrument Serif', serif;
+    font-size: 24px; color: var(--accent);
+  }
+
+  .asset-item { display: flex; gap: 10px; margin-bottom: 0.75rem; align-items: flex-start; }
+  .asset-item:last-child { margin-bottom: 0; }
+  .asset-dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--accent); margin-top: 7px; flex-shrink: 0;
+  }
+  .asset-text { font-size: 14px; line-height: 1.65; }
+
+  .gap-item { display: flex; gap: 10px; margin-bottom: 1rem; align-items: flex-start; }
+  .gap-item:last-child { margin-bottom: 0; }
+  .gap-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px; padding: 2px 7px;
+    border-radius: 3px; text-transform: uppercase;
+    letter-spacing: 0.08em; flex-shrink: 0; margin-top: 3px;
+  }
+  .gap-tag.fix { background: #1a2a1a; color: var(--success); }
+  .gap-tag.note { background: #2a2200; color: var(--accent); }
+  .gap-tag.risk { background: #2a1a1a; color: var(--danger); }
+  .gap-text { font-size: 14px; line-height: 1.6; }
+  .gap-action { font-size: 12px; color: var(--muted); margin-top: 3px; }
+
+  .action-item {
+    display: flex; gap: 12px;
+    margin-bottom: 0.875rem; align-items: flex-start;
+  }
+  .action-item:last-child { margin-bottom: 0; }
+  .action-num {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--accent); color: #0a0a0a;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; font-weight: 500; flex-shrink: 0; margin-top: 1px;
+  }
+  .action-text { font-size: 14px; line-height: 1.6; }
+
+  .profile-actions {
+    display: flex; gap: 10px;
+    margin-top: 1.5rem; flex-wrap: wrap;
+    padding-bottom: 2rem;
+  }
+  .btn-secondary {
+    flex: 1;
+    padding: 11px 18px;
+    background: var(--surface);
+    color: var(--text);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; cursor: pointer;
+    transition: all 0.2s; text-align: center;
+    min-width: 130px;
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* LOADING */
+  .loading-overlay {
+    display: none; position: fixed; inset: 0;
+    background: rgba(10,10,10,0.88); z-index: 100;
+    align-items: center; justify-content: center;
+    flex-direction: column; gap: 1rem;
+  }
+  .loading-overlay.show { display: flex; }
+  .loading-spinner {
+    width: 34px; height: 34px;
+    border: 2px solid var(--border2);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px; color: var(--muted);
+    letter-spacing: 0.1em; text-transform: uppercase;
+  }
+
+  /* NOTIFICATION */
+  .notif {
+    position: fixed; bottom: 1.5rem; right: 1.5rem;
+    background: var(--surface2); border: 1px solid var(--border2);
+    border-radius: 8px; padding: 0.75rem 1rem;
+    font-size: 13px; z-index: 200;
+    opacity: 0; transform: translateY(10px);
+    transition: all 0.3s; max-width: 260px;
+  }
+  .notif.show { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 600px) {
+    .chat-messages { padding: 1rem; }
+    .chat-input-area { padding: 0.75rem 1rem; }
+    #screen-profile { padding: 1rem; }
+    .salary-display { grid-template-columns: 1fr; }
+    .profile-actions { flex-direction: column; }
+    .btn-secondary { min-width: unset; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">Hire<span>OS</span></div>
+  <div class="stage-indicator">
+    <div class="stage-dot active" id="dot-1"></div>
+    <div class="stage-dot" id="dot-2"></div>
+    <div class="stage-dot" id="dot-3"></div>
+    <span class="stage-label" id="stage-label">Upload CV</span>
+  </div>
+</header>
+<div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
+
+<main>
+
+  <!-- SCREEN 1: UPLOAD -->
+  <div class="screen active" id="screen-upload">
+    <div class="upload-inner">
+      <h1>Your career,<br><em>decoded.</em></h1>
+      <p>Upload your CV. Answer a few real questions. Get your Career Intelligence Profile — what you're worth, what's missing, and exactly why your search isn't converting.</p>
+
+      <div class="upload-zone" id="upload-zone">
+        <span class="upload-icon">📄</span>
+        <h3>Drop your CV here</h3>
+        <p>PDF · Max 5MB</p>
+        <input type="file" id="cv-file-input" accept=".pdf">
+      </div>
+
+      <div class="file-selected" id="file-selected">
+        <span>📄</span>
+        <span class="file-name" id="file-name">—</span>
+        <span class="file-size" id="file-size">—</span>
+      </div>
+
+      <button class="btn-primary" id="start-btn" disabled>
+        Start My Diagnostic →
+      </button>
+      <span class="skip-link" id="skip-link">Continue without CV</span>
+    </div>
+  </div>
+
+  <!-- SCREEN 2: CHAT -->
+  <div class="screen" id="screen-chat">
+    <div class="chat-messages" id="chat-messages">
+      <div class="typing-indicator" id="typing">
+        <div class="typing-avatar">H</div>
+        <div class="typing-dots"><span></span><span></span><span></span></div>
+      </div>
+    </div>
+    <div class="chat-input-area">
+      <div class="input-row">
+        <textarea id="user-input" placeholder="Type your answer..." rows="1"></textarea>
+        <button id="send-btn" disabled>↑</button>
+      </div>
+      <p class="input-hint">ENTER to send · SHIFT+ENTER for new line</p>
+    </div>
+  </div>
+
+  <!-- SCREEN 3: PROFILE -->
+  <div class="screen" id="screen-profile">
+    <div class="profile-inner" id="profile-content"></div>
+  </div>
+
+</main>
+
+<div class="loading-overlay" id="loading">
+  <div class="loading-spinner"></div>
+  <div class="loading-text" id="loading-text">Reading your CV...</div>
+</div>
+
+<div class="notif" id="notif"></div>
+
+<script>
+// ── CONFIG ──
+// When running on Vercel, calls go to /api/chat
+// When running locally, same (won't work locally without server — use Vercel)
+const API_URL = '/api/chat';
+
+// ── STATE ──
+const state = {
+  cvText: '',
+  messages: [],
+  questionCount: 0,
+  profileData: null
+};
+
+// ── SYSTEM PROMPT ──
+function buildSystemPrompt() {
+  const cvSection = state.cvText
+    ? `\n\nCANDIDATE CV:\n"""\n${state.cvText}\n"""\n\nYou have read this CV before starting. Do NOT ask them to repeat information already on the CV. Reference it naturally in your questions.`
+    : '\n\nNo CV provided. Ask about their background naturally in the first message.';
+
+  return `You are HireOS, an elite AI career coach for mid-career professionals in India. You are warm, direct, and deeply perceptive. Your job is to find what is hidden, undervalued, or missing in someone's career story — not just what is on their CV.
+
+YOU ARE CONDUCTING A CAREER DIAGNOSTIC CONVERSATION.
+${cvSection}
+
+STRICT RULES:
+1. Ask exactly ONE question per message. Never two.
+2. Each question must build on what they just said. Listen deeply.
+3. Keep each message to 2-4 sentences maximum. This is a conversation, not a report.
+4. Never give generic career advice. Every response must be specific to THIS person.
+5. You are hunting for: hidden achievements not on CV, undervalued experiences, salary anchoring problems, the "forgotten moment" (something significant they haven't mentioned).
+6. Be honest about salary — push back gently if they are underselling themselves.
+7. After 7-8 exchanges when you have enough, generate the Career Intelligence Profile in the exact JSON format below. Output ONLY the JSON wrapped in the tags, nothing else before or after.
+
+DIAGNOSTIC FLOW (adapt to their responses):
+- Opening: Acknowledge one specific thing from their CV that catches your attention, then ask ONE probing question about something missing or underexplored.
+- Rounds 2-4: Dig into real accomplishments. What are they proud of that isn't on the CV? Find the "Australia trip" moment.
+- Round 5: Reality-check their salary expectation against their actual market value.
+- Round 6: Understand what kind of company/environment they actually want.
+- Round 7: Ask what has been blocking their search. Get specific.
+- Round 8: You have enough. Generate the profile.
+
+PROFILE FORMAT — output EXACTLY this when ready, nothing else:
+<PROFILE_START>
+{
+  "name": "their name or Professional",
+  "target_role": "Specific role title",
+  "target_industries": ["Industry 1", "Industry 2"],
+  "profile_summary": "2-3 honest sentences on who this person is and why they are valuable",
+  "hidden_assets": [
+    "Specific hidden achievement or undervalued credential",
+    "Another hidden asset",
+    "Another"
+  ],
+  "market_value": {
+    "realistic_target": "₹X–Y LPA",
+    "ceiling": "₹X LPA",
+    "rationale": "One specific sentence explaining this range based on their profile"
+  },
+  "positioning_gaps": [
+    {"type": "fix", "issue": "Specific problem", "action": "Exact thing to do"},
+    {"type": "note", "issue": "Something to be aware of", "action": "How to handle"},
+    {"type": "risk", "issue": "Real risk", "action": "How to mitigate"}
+  ],
+  "target_companies": {
+    "tier1": ["Company 1", "Company 2", "Company 3"],
+    "tier2": ["Company 1", "Company 2"],
+    "avoid": ["Type to avoid and brief reason"]
+  },
+  "why_not_converting": "Honest 2-3 sentence diagnosis of why their search is not working",
+  "next_actions": [
+    "Most important thing to do TODAY — specific",
+    "Do this week",
+    "Do before applying anywhere"
+  ]
+}
+<PROFILE_END>`;
+}
+
+// ── API CALL ──
+async function callAPI(messages, maxTokens = 600) {
+  const response = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messages,
+      system: buildSystemPrompt(),
+      max_tokens: maxTokens
+    })
+  });
+
+  if (!response.ok) {
+    const err = await response.json().catch(() => ({}));
+    throw new Error(err.error || `HTTP ${response.status}`);
+  }
+
+  const data = await response.json();
+  return data.content;
+}
+
+// ── PDF READING ──
+async function readPDF(file) {
+  if (!window.pdfjsLib) {
+    await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+  }
+
+  const buffer = await file.arrayBuffer();
+  const pdf = await window.pdfjsLib.getDocument({ data: buffer }).promise;
+  let text = '';
+
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    text += content.items.map(item => item.str).join(' ') + '\n';
+  }
+
+  return text.trim();
+}
+
+function loadScript(src) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = src; s.onload = resolve; s.onerror = reject;
+    document.head.appendChild(s);
+  });
+}
+
+// ── UI HELPERS ──
+function setStage(stage) {
+  const map = { upload: [1, 'Upload CV'], chat: [2, 'Diagnostic'], profile: [3, 'Your Profile'] };
+  const [num, label] = map[stage];
+
+  document.querySelectorAll('.stage-dot').forEach((d, i) => {
+    d.className = 'stage-dot';
+    if (i + 1 < num) d.classList.add('done');
+    else if (i + 1 === num) d.classList.add('active');
+  });
+
+  document.getElementById('stage-label').textContent = label;
+  document.getElementById('progress').style.width = `${(num / 3) * 100}%`;
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(`screen-${stage}`).classList.add('active');
+}
+
+function showLoading(text) {
+  document.getElementById('loading-text').textContent = text || 'Thinking...';
+  document.getElementById('loading').classList.add('show');
+}
+
+function hideLoading() {
+  document.getElementById('loading').classList.remove('show');
+}
+
+function showTyping() {
+  document.getElementById('typing').classList.add('show');
+  scrollBottom();
+}
+
+function hideTyping() {
+  document.getElementById('typing').classList.remove('show');
+}
+
+function scrollBottom() {
+  const c = document.getElementById('chat-messages');
+  setTimeout(() => c.scrollTop = c.scrollHeight, 60);
+}
+
+function notify(text, ms = 3000) {
+  const n = document.getElementById('notif');
+  n.textContent = text;
+  n.classList.add('show');
+  setTimeout(() => n.classList.remove('show'), ms);
+}
+
+function addMessage(role, text) {
+  const container = document.getElementById('chat-messages');
+  const typing = document.getElementById('typing');
+
+  const msg = document.createElement('div');
+  msg.className = `msg ${role}`;
+
+  const avatar = document.createElement('div');
+  avatar.className = 'msg-avatar';
+  avatar.textContent = role === 'ai' ? 'H' : 'Y';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'msg-bubble';
+  bubble.innerHTML = text
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n/g, '<br>');
+
+  msg.appendChild(avatar);
+  msg.appendChild(bubble);
+  container.insertBefore(msg, typing);
+  scrollBottom();
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ── CHAT ──
+async function startChat() {
+  setStage('chat');
+  document.getElementById('send-btn').disabled = false;
+  showTyping();
+
+  const openingMessage = state.cvText
+    ? `I have uploaded my CV. Please start my career diagnostic.`
+    : `I have not uploaded a CV. Please start my career diagnostic.`;
+
+  state.messages = [{ role: 'user', content: openingMessage }];
+
+  try {
+    const reply = await callAPI(state.messages);
+    hideTyping();
+
+    if (reply.includes('<PROFILE_START>')) {
+      processProfile(reply);
+    } else {
+      addMessage('ai', reply);
+      state.messages.push({ role: 'assistant', content: reply });
+      state.questionCount = 1;
+    }
+  } catch (err) {
+    hideTyping();
+    addMessage('ai', `I'm having trouble connecting. Error: ${err.message}. Please refresh and try again.`);
+    console.error(err);
+  }
+}
+
+async function sendMessage() {
+  const input = document.getElementById('user-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  input.style.height = 'auto';
+  document.getElementById('send-btn').disabled = true;
+
+  addMessage('user', text);
+  state.messages.push({ role: 'user', content: text });
+  state.questionCount++;
+
+  showTyping();
+
+  try {
+    const isLastRound = state.questionCount >= 8;
+    const messagesForAPI = isLastRound
+      ? [...state.messages, { role: 'user', content: '[Generate the Career Intelligence Profile JSON now.]' }]
+      : state.messages;
+
+    const reply = await callAPI(messagesForAPI, isLastRound ? 2000 : 600);
+    hideTyping();
+
+    if (reply.includes('<PROFILE_START>')) {
+      addMessage('ai', "That's everything I need. Generating your Career Intelligence Profile now...");
+      await sleep(1200);
+      processProfile(reply);
+    } else {
+      addMessage('ai', reply);
+      state.messages.push({ role: 'assistant', content: reply });
+      document.getElementById('send-btn').disabled = false;
+    }
+  } catch (err) {
+    hideTyping();
+    addMessage('ai', `Something went wrong: ${err.message}. Please try again.`);
+    document.getElementById('send-btn').disabled = false;
+    console.error(err);
+  }
+}
+
+// ── PROFILE ──
+function processProfile(raw) {
+  try {
+    const match = raw.match(/<PROFILE_START>([\s\S]*?)<PROFILE_END>/);
+    if (!match) throw new Error('Profile tags not found');
+    const data = JSON.parse(match[1].trim());
+    state.profileData = data;
+    showLoading('Building your Career Intelligence Profile...');
+    setTimeout(() => {
+      hideLoading();
+      renderProfile(data);
+      setStage('profile');
+    }, 2000);
+  } catch (err) {
+    console.error('Profile error:', err);
+    // Ask Claude to regenerate
+    regenerateProfile();
+  }
+}
+
+async function regenerateProfile() {
+  showLoading('Generating your profile...');
+  try {
+    const msgs = [...state.messages, {
+      role: 'user',
+      content: 'Please generate my Career Intelligence Profile JSON now in the exact format specified.'
+    }];
+    const reply = await callAPI(msgs, 2000);
+    hideLoading();
+    const match = reply.match(/<PROFILE_START>([\s\S]*?)<PROFILE_END>/);
+    if (match) {
+      const data = JSON.parse(match[1].trim());
+      state.profileData = data;
+      renderProfile(data);
+      setStage('profile');
+    } else {
+      notify('Could not generate profile. Please continue the conversation.');
+    }
+  } catch (err) {
+    hideLoading();
+    notify('Error generating profile. Please refresh and try again.');
+  }
+}
+
+function renderProfile(d) {
+  document.getElementById('profile-content').innerHTML = `
+    <div class="profile-header">
+      <div class="profile-eyebrow">Career Intelligence Profile</div>
+      <h1>${d.name}</h1>
+      <p>Generated ${new Date().toLocaleDateString('en-IN', {day:'numeric',month:'long',year:'numeric'})}</p>
+    </div>
+
+    <div class="profile-section">
+      <div class="ps-header"><span class="ps-icon">🎯</span><span class="ps-title">Target Role</span></div>
+      <div class="ps-body">
+        <div class="target-role-card">
+          <div class="target-role-title">${d.target_role}</div>
+          <div class="target-role-sub">${d.target_industries.join(' · ')}</div>
+        </div>
+        <p style="color:var(--muted);font-size:13px">${d.profile_summary}</p>
+      </div>
+    </div>
+
+    <div class="profile-section">
+      <div class="ps-header"><span class="ps-icon">💰</span><span class="ps-title">Your Real Market Value</span></div>
+      <div class="ps-body">
+        <div class="salary-display">
+          <div class="salary-cell">
+            <div class="salary-label">Realistic Target</div>
+            <div class="salary-value">${d.market_value.realistic_target}</div>
+          </div>
+          <div class="salary-cell">
+            <div class="salary-label">Ceiling</div>
+            <div class="salary-value">${d.market_value.ceiling}</div>
+          </div>
+        </div>
+        <p style="font-size:13px;color:var(--muted)">${d.market_value.rationale}</p>
+      </div>
+    </div>
+
+    <div class="profile-section">
+      <div class="ps-header"><span class="ps-icon">💎</span><span class="ps-title">Hidden Assets — What Your CV Is Missing</span></div>
+      <div class="ps-body">
+        ${d.hidden_assets.map(a => `
+          <div class="asset-item">
+            <div class="asset-dot"></div>
+            <div class="asset-text">${a}</div>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    ${d.why_not_converting ? `
+    <div class="profile-section">
+      <div class="ps-header"><span class="ps-icon">🔍</span><span class="ps-title">Why Your Search Isn't Converting</span></div>
+      <div class="ps-body"><p>${d.why_not_converting}</p></div>
+    </div>` : ''}
+
+    <div class="profile-section">
+      <div class="ps-header"><span class="ps-icon">⚡</span><span class="ps-title">Positioning Gaps & Fixes</span></div>
+      <div class="ps-body">
+        ${d.positioning_gaps.map(g => `
+          <div class="gap-item">
+            <span class="gap-tag ${g.type}">${g.type}</span>
+            <div class="gap-text">
+              <strong style="color:var(--text)">${g.issue}</strong>
+              <div class="gap-action">${g.action}</div>
+            </div>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <div class="profile-section">
+      <div class="ps-header"><span class="ps-icon">🏢</span><span class="ps-title">Where to Apply</span></div>
+      <div class="ps-body">
+        <p style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.75rem">Priority targets</p>
+        ${d.target_companies.tier1.map(c => `
+          <div class="asset-item">
+            <div class="asset-dot"></div>
+            <div class="asset-text">${c}</div>
+          </div>`).join('')}
+        <p style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em;margin:.875rem 0 .75rem">Also consider</p>
+        ${d.target_companies.tier2.map(c => `
+          <div class="asset-item">
+            <div class="asset-dot" style="background:var(--border2)"></div>
+            <div class="asset-text">${c}</div>
+          </div>`).join('')}
+        ${d.target_companies.avoid?.length ? `
+        <p style="font-size:11px;color:var(--danger);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em;margin:.875rem 0 .75rem">Avoid for now</p>
+        ${d.target_companies.avoid.map(c => `
+          <div class="asset-item">
+            <div class="asset-dot" style="background:var(--danger)"></div>
+            <div class="asset-text" style="color:var(--muted)">${c}</div>
+          </div>`).join('')}` : ''}
+      </div>
+    </div>
+
+    <div class="profile-section">
+      <div class="ps-header"><span class="ps-icon">→</span><span class="ps-title">Your Next 3 Actions</span></div>
+      <div class="ps-body">
+        ${d.next_actions.map((a, i) => `
+          <div class="action-item">
+            <div class="action-num">${i + 1}</div>
+            <div class="action-text">${a}</div>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <div class="profile-actions">
+      <button class="btn-secondary" onclick="continueChat()">💬 Continue Conversation</button>
+      <button class="btn-secondary" onclick="startOver()">↺ Start Over</button>
+    </div>
+  `;
+}
+
+function continueChat() {
+  setStage('chat');
+  addMessage('ai', "What would you like to work on next? We can dig into your resume rewrite, interview prep, or your outreach strategy.");
+  document.getElementById('send-btn').disabled = false;
+}
+
+function startOver() {
+  Object.assign(state, { cvText: '', messages: [], questionCount: 0, profileData: null });
+  document.getElementById('chat-messages').innerHTML = `
+    <div class="typing-indicator" id="typing">
+      <div class="typing-avatar">H</div>
+      <div class="typing-dots"><span></span><span></span><span></span></div>
+    </div>`;
+  document.getElementById('file-selected').classList.remove('show');
+  document.getElementById('start-btn').disabled = true;
+  setStage('upload');
+}
+
+// ── UPLOAD ──
+const uploadZone = document.getElementById('upload-zone');
+const fileInput = document.getElementById('cv-file-input');
+const startBtn = document.getElementById('start-btn');
+
+uploadZone.addEventListener('click', () => fileInput.click());
+uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag'); });
+uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag'));
+uploadZone.addEventListener('drop', e => {
+  e.preventDefault(); uploadZone.classList.remove('drag');
+  if (e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', e => { if (e.target.files[0]) handleFile(e.target.files[0]); });
+
+async function handleFile(file) {
+  if (file.size > 5 * 1024 * 1024) { notify('File too large. Max 5MB.'); return; }
+  document.getElementById('file-name').textContent = file.name;
+  document.getElementById('file-size').textContent = `${(file.size / 1024).toFixed(0)} KB`;
+  document.getElementById('file-selected').classList.add('show');
+  showLoading('Reading your CV...');
+  try {
+    state.cvText = await readPDF(file);
+    hideLoading();
+    startBtn.disabled = false;
+    notify(state.cvText ? 'CV read successfully ✓' : 'CV uploaded — some text may not be readable');
+  } catch (err) {
+    hideLoading();
+    startBtn.disabled = false;
+    state.cvText = '';
+    notify('Could not read CV. Starting without it.');
+    console.error(err);
+  }
+}
+
+startBtn.addEventListener('click', startChat);
+document.getElementById('skip-link').addEventListener('click', () => { state.cvText = ''; startChat(); });
+
+// ── INPUT ──
+const userInput = document.getElementById('user-input');
+const sendBtn = document.getElementById('send-btn');
+
+userInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (!sendBtn.disabled) sendMessage(); }
+});
+userInput.addEventListener('input', () => {
+  userInput.style.height = 'auto';
+  userInput.style.height = Math.min(userInput.scrollHeight, 140) + 'px';
+});
+sendBtn.addEventListener('click', sendMessage);
+</script>
+</body>
+</html>
