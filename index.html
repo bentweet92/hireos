@@ -344,14 +344,34 @@ BEFORE GENERATING THE PROFILE — connect everything:
 - Is the salary expectation realistic given their CTC and the type of move they're making?
 - Are the companies you're recommending actually likely to hire this person given everything you now know?
 
-COMPANY LIST RULES:
-- Only put a company in tier1 if they are genuinely likely to hire this person given their background AND constraints.
+COMPANY LIST RULES — THIS IS THE MOST IMPORTANT SECTION:
+Before writing any company name, ask yourself: "Would a hiring manager at this company, seeing this person's CV, recognise it as directly relevant to a role they are hiring for?" If the answer is no or maybe, the company does not belong in tier1.
+
+THE HIRING PROBABILITY TEST — apply to every company you consider:
+1. Does this company operate in the same industry as the candidate's background? (BPO, travel, financial services, etc.)
+2. Does this company have a dedicated training/L&D function at the size and level the candidate is targeting?
+3. Is this company known to hire on experience rather than requiring specific credentials?
+4. Is this company realistic for their salary band?
+If a company fails 2 or more of these tests, it goes in avoid or is dropped entirely.
+
+NEVER PUT IN TIER1 OR TIER2:
+- Consumer tech startups (Byju's, Swiggy, Zomato, Razorpay, CRED, Zerodha, Meesho, PhonePe) — their training needs are specialist and unrelated to BPO/travel/FS backgrounds
+- Product companies hiring generalist "culture" trainers — not the same as operations or process training
+- Companies famous for being well-known but irrelevant to the candidate's industry
+- Any company you are guessing about — if you are not confident they actively hire for this role type, leave them out
+
+CORRECT APPROACH BY BACKGROUND:
+- BPO/Contact Center background: Aegis, WNS, HGS, iEnergizer, Startek, Mphasis BPO, EXL Service, Sutherland, TTEC, Firstsource
+- Travel/Hospitality background: MakeMyTrip, Thomas Cook, SOTC, Cox & Kings, Yatra, Cleartrip, OYO (ops roles), Club Mahindra
+- Financial Services L&D: HDFC Bank, ICICI Bank, Kotak, Bajaj Finserv, Aditya Birla Capital, Muthoot, Shriram Group — mid-tier banks and NBFCs, not Big 4 consulting
+- General corporate L&D targeting mid-size: companies with 500-2000 employees in their industry, not household names
+
 - If degree is a known blocker: large MNCs with strict ATS (TCS, Infosys, Wipro, Accenture, Cognizant, Capgemini) go in avoid with specific reason.
 - If degree is NOT a confirmed blocker: don't penalise them — put appropriate companies in tier1/tier2.
-- tier1 = highest probability of callback given this specific person's profile.
-- tier2 = worth trying, slightly harder fit.
-- avoid = specific companies or types with specific reason why.
-- next_actions must NOT say "rewrite CV" (the tool does that) or "search LinkedIn" (the Outreach tab does that). Actions should be: which company to approach first and exactly how, what job title to search for, what to prepare for the most likely objection.
+- tier1 = 3-4 specific company names with highest callback probability. Real names, not categories.
+- tier2 = 2-3 specific company names worth trying, slightly harder fit. Real names.
+- avoid = specific companies or types with specific reason why this person would get rejected there.
+- next_actions must NOT say "rewrite CV" (the tool does that) or "search LinkedIn" (the Outreach tab does that). Actions should be: which specific company to approach first and how, what exact job title to search for, what to prepare for the most likely objection they will face.
 
 OUTPUT ONLY THIS JSON IN EXACT TAGS:
 <PROFILE_START>
@@ -373,23 +393,23 @@ OUTPUT ONLY THIS JSON IN EXACT TAGS:
     {"type": "risk", "issue": "real risk", "action": "how to mitigate"}
   ],
   "target_companies": {
-    "tier1": ["mid-size company specific to their industry","another","another"],
-    "tier2": ["larger company that may make exceptions","another"],
-    "avoid": ["Large MNCs with degree filters — specific names and specific reason"]
+    "tier1": ["specific real company name","specific real company name","specific real company name"],
+    "tier2": ["specific real company name","specific real company name"],
+    "avoid": ["Specific company or type — exact reason why this person would be rejected there"]
   },
-  "why_not_converting": "Specific 2-3 sentence diagnosis tied to their exact answers.",
-  "next_actions": ["specific action not requiring manual CV rewrite — e.g. which company to approach first and how","second action","third action"],
+  "why_not_converting": "Specific 2-3 sentence diagnosis tied to their exact answers. Name the actual problem.",
+  "next_actions": ["Approach [specific company] first — search for [specific job title] on Naukri/LinkedIn and apply directly, not through Easy Apply","Second specific action","Third specific action — what to say when the most likely objection comes up"],
   "cv_rewrite_context": {
-    "current_headline": "what their CV currently leads with based on their background",
-    "target_headline": "what it should lead with for their target role",
+    "current_headline": "what their CV currently leads with based on their CV content",
+    "target_headline": "what it should lead with — specific, achievement-led, written for their target role",
     "top_bullets": [
-      "strongest rewritten bullet using their actual experience and numbers",
-      "second strongest bullet",
-      "third strongest bullet",
-      "fourth bullet",
-      "fifth bullet"
+      "Achievement bullet using their actual numbers and context from CV/conversation",
+      "Second bullet — different achievement, specific metric",
+      "Third bullet",
+      "Fourth bullet",
+      "Fifth bullet"
     ],
-    "summary_paragraph": "3-sentence rewritten CV summary leading with training expertise, not operations"
+    "summary_paragraph": "3 sentences. First sentence: who they are and their strongest credential. Second: what they have built or achieved. Third: what they are looking for and why they are ready."
   },
   "interview_questions": [
     {"q": "Behavioral question specific to their target role and background", "what_they_want": "what this question is really testing"},
