@@ -170,6 +170,22 @@
   .company-chip:active { border-color: var(--accent); color: var(--accent); }
   .copy-btn:active { border-color: var(--accent); color: var(--accent); }
 
+  /* CV REWRITE MODULE */
+  .cv-section-block { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 1rem; margin-bottom: .875rem; }
+  .cv-section-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; margin-bottom: .75rem; }
+  .cv-before-after { display: grid; grid-template-columns: 1fr auto 1fr; gap: 8px; align-items: center; margin-bottom: .75rem; }
+  .cv-before, .cv-after { padding: .625rem; border-radius: 6px; }
+  .cv-before { background: rgba(232,85,71,0.08); border: 1px solid rgba(232,85,71,0.2); }
+  .cv-after { background: rgba(71,200,122,0.08); border: 1px solid rgba(71,200,122,0.2); }
+  .cv-ba-label { font-size: 10px; color: var(--muted); font-family: 'DM Mono', monospace; text-transform: uppercase; margin-bottom: 4px; }
+  .cv-ba-text { font-size: 13px; line-height: 1.5; }
+  .cv-arrow { font-size: 16px; color: var(--muted); text-align: center; }
+  .cv-summary-text { font-size: 14px; line-height: 1.7; color: var(--text); margin-bottom: .75rem; padding: .75rem; background: var(--surface); border-radius: 6px; border: 1px solid var(--border); }
+  .cv-bullet-item { display: flex; gap: 10px; align-items: flex-start; padding: .625rem 0; border-bottom: 1px solid var(--border); }
+  .cv-bullet-item:last-child { border-bottom: none; }
+  .cv-bullet-num { width: 20px; height: 20px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border2); display: flex; align-items: center; justify-content: center; font-size: 10px; color: var(--muted); flex-shrink: 0; margin-top: 2px; }
+  .cv-bullet-text { font-size: 13px; line-height: 1.6; flex: 1; }
+
   /* LOADING & NOTIF */
   .loading-overlay { display: none; position: fixed; inset: 0; background: rgba(10,10,10,0.88); z-index: 100; align-items: center; justify-content: center; flex-direction: column; gap: 1rem; }
   .loading-overlay.show { display: flex; }
@@ -312,6 +328,13 @@ CONNECT ALL 5 BEFORE GENERATING:
 - What is the one thing they are not seeing?
 Profile must be specific to THIS person. Not generic.
 
+COMPANY LIST RULES — apply before writing target_companies:
+- If graduation filter / degree requirement is flagged as a blocker or risk: large MNCs (TCS, Infosys, Wipro, Accenture, Capgemini, IBM, Cognizant) go into "avoid", NOT tier1 or tier2. They use ATS with mandatory degree filters.
+- tier1 = companies most likely to hire on experience over degree: mid-size BPOs, travel companies, regional firms, growing startups with 200-1000 employees.
+- tier2 = larger companies that sometimes make exceptions, or companies in adjacent industries worth trying.
+- avoid = be specific about WHY, not just "traditional MNCs". Example: "Large MNCs like TCS/Wipro — strict ATS degree filter will auto-reject before human review."
+- next_actions must NOT include "rewrite CV" or "find employees on LinkedIn" as a manual task — the tool handles CV rewriting, and LinkedIn search is handled in the Outreach tab. Instead: actions should be about which company to approach first, what role title to search for, what to say when asked about degree.
+
 OUTPUT ONLY THIS JSON IN EXACT TAGS:
 <PROFILE_START>
 {
@@ -321,10 +344,10 @@ OUTPUT ONLY THIS JSON IN EXACT TAGS:
   "profile_summary": "2-3 honest sentences. Plain language.",
   "hidden_assets": ["specific underplayed credential","another","another"],
   "market_value": {
-    "current_ctc": "₹X LPA",
-    "realistic_target": "₹X–Y LPA",
-    "ceiling": "₹X LPA",
-    "rationale": "One sentence — how you calculated this from their CTC and target role"
+    "current_ctc": "current CTC they told you",
+    "realistic_target": "calculated range based on their CTC and move type",
+    "ceiling": "best case number",
+    "rationale": "One sentence — how you calculated this from their actual CTC"
   },
   "positioning_gaps": [
     {"type": "fix", "issue": "problem", "action": "exact action"},
@@ -332,12 +355,24 @@ OUTPUT ONLY THIS JSON IN EXACT TAGS:
     {"type": "risk", "issue": "real risk", "action": "how to mitigate"}
   ],
   "target_companies": {
-    "tier1": ["Company 1","Company 2","Company 3"],
-    "tier2": ["Company 1","Company 2"],
-    "avoid": ["type to avoid — one line reason"]
+    "tier1": ["mid-size company specific to their industry","another","another"],
+    "tier2": ["larger company that may make exceptions","another"],
+    "avoid": ["Large MNCs with degree filters — specific names and specific reason"]
   },
-  "why_not_converting": "Specific 2-3 sentence diagnosis.",
-  "next_actions": ["do today — specific","do this week","do before applying anywhere"],
+  "why_not_converting": "Specific 2-3 sentence diagnosis tied to their exact answers.",
+  "next_actions": ["specific action not requiring manual CV rewrite — e.g. which company to approach first and how","second action","third action"],
+  "cv_rewrite_context": {
+    "current_headline": "what their CV currently leads with based on their background",
+    "target_headline": "what it should lead with for their target role",
+    "top_bullets": [
+      "strongest rewritten bullet using their actual experience and numbers",
+      "second strongest bullet",
+      "third strongest bullet",
+      "fourth bullet",
+      "fifth bullet"
+    ],
+    "summary_paragraph": "3-sentence rewritten CV summary leading with training expertise, not operations"
+  },
   "interview_questions": [
     {"q": "Behavioral question specific to their target role and background", "what_they_want": "what this question is really testing"},
     {"q": "Situation-based question for their industry", "what_they_want": "what this question is really testing"},
@@ -487,7 +522,7 @@ async function sendMessage() {
     const msgs = isLast
       ? [...state.messages, { role:'user', content:'[Generate the Career Intelligence Profile JSON now. Output ONLY the JSON tags. No other text.]' }]
       : state.messages;
-    const reply = await callAPI(msgs, isLast ? 2500 : 300);
+    const reply = await callAPI(msgs, isLast ? 3500 : 300);
     hideTyping();
     if (reply.includes('<PROFILE_START>')) {
       addMessage('ai', "Got everything I need. Building your profile now...");
@@ -524,7 +559,7 @@ async function regenProfile() {
   showLoading('Generating your profile...');
   try {
     const msgs = [...state.messages, { role:'user', content:'Generate my Career Intelligence Profile JSON now. Output ONLY the JSON inside the tags.' }];
-    const reply = await callAPI(msgs, 2500);
+    const reply = await callAPI(msgs, 3500);
     hideLoading();
     const match = reply.match(/<PROFILE_START>([\s\S]*?)<PROFILE_END>/);
     if (match) {
@@ -579,6 +614,7 @@ function renderProfile(d) {
       <div class="module-tabs">
         <button class="mod-tab" onclick="switchModule('interview',this)">🎤 Interview Prep</button>
         <button class="mod-tab active" onclick="switchModule('outreach',this)">📨 Outreach</button>
+        <button class="mod-tab" onclick="switchModule('cv',this)">📝 CV Rewrite</button>
         <button class="mod-tab" onclick="switchModule('hidden',this)">🔎 Hidden Jobs</button>
       </div>
 
@@ -587,6 +623,9 @@ function renderProfile(d) {
       </div>
       <div class="module-panel active" id="mod-outreach">
         ${renderOutreachModule(d)}
+      </div>
+      <div class="module-panel" id="mod-cv">
+        ${renderCVRewriteModule(d)}
       </div>
       <div class="module-panel" id="mod-hidden">
         ${renderHiddenJobsModule(d)}
@@ -824,6 +863,112 @@ Output only the message text. Nothing else.`;
 function copyOutreach() {
   const text = document.getElementById('outreach-text')?.textContent;
   if (text) navigator.clipboard.writeText(text).then(()=>notify('Copied ✓'));
+}
+
+// ── CV REWRITE MODULE ──
+function renderCVRewriteModule(d) {
+  const cv = d.cv_rewrite_context;
+
+  // If AI didn't generate cv_rewrite_context (older session), show generate button
+  if (!cv || !cv.top_bullets) {
+    return `
+      <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:.875rem">Generate a rewritten CV section leading with your training expertise — ready to copy into your actual CV.</p>
+      <button class="btn-submit" onclick="generateCVRewrite()">Generate My CV Rewrite</button>
+      <div id="cv-rewrite-result" style="display:none"></div>`;
+  }
+
+  return renderCVRewriteOutput(cv);
+}
+
+function renderCVRewriteOutput(cv) {
+  const bullets = (cv.top_bullets || []).map((b, i) => `
+    <div class="cv-bullet-item">
+      <div class="cv-bullet-num">${i+1}</div>
+      <div class="cv-bullet-text">${b}</div>
+    </div>`).join('');
+
+  return `
+    <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:1rem">Your CV rewritten to lead with training expertise. Copy these directly into your CV. Each bullet is written for a hiring manager scanning for a Training Manager, not an Operations Manager.</p>
+
+    <div class="cv-section-block">
+      <div class="cv-section-label">Headline — replace your current title with this</div>
+      <div class="cv-before-after">
+        <div class="cv-before">
+          <div class="cv-ba-label">Current</div>
+          <div class="cv-ba-text">${cv.current_headline || '—'}</div>
+        </div>
+        <div class="cv-arrow">→</div>
+        <div class="cv-after">
+          <div class="cv-ba-label">Rewritten</div>
+          <div class="cv-ba-text">${cv.target_headline || '—'}</div>
+        </div>
+      </div>
+      <button class="copy-btn" onclick="copyText('${(cv.target_headline||'').replace(/'/g,"\'")}')">Copy headline</button>
+    </div>
+
+    <div class="cv-section-block">
+      <div class="cv-section-label">Summary paragraph — replaces your current opening</div>
+      <div class="cv-summary-text">${cv.summary_paragraph || '—'}</div>
+      <button class="copy-btn" onclick="copyText(\`${(cv.summary_paragraph||'').replace(/`/g,"\`")}\`)">Copy summary</button>
+    </div>
+
+    <div class="cv-section-block">
+      <div class="cv-section-label">Top 5 achievement bullets — lead your experience section with these</div>
+      ${bullets}
+      <button class="copy-btn" style="margin-top:.75rem" onclick="copyAllBullets()">Copy all bullets</button>
+    </div>
+
+    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:.875rem;margin-top:.75rem">
+      <p style="font-size:12px;color:var(--muted);line-height:1.6">These bullets are written for your target role. When asked about your degree in an interview, lead with: <em style="color:var(--text)">"My experience includes [specific achievement] — I'd welcome a conversation about how that translates."</em> Don't apologise for it.</p>
+    </div>`;
+}
+
+async function generateCVRewrite() {
+  showLoading('Rewriting your CV...');
+  const d = state.profileData;
+  const system = `You are rewriting a professional's CV to position them for a career transition.
+
+Current background: ${d.outreach_context?.background_summary || d.profile_summary}
+Target role: ${d.target_role}
+Hidden assets identified: ${(d.hidden_assets||[]).join(', ')}
+Value proposition: ${d.outreach_context?.value_proposition || ''}
+
+Generate a CV rewrite in this EXACT JSON format, nothing else:
+{
+  "current_headline": "what their CV likely leads with based on their background",
+  "target_headline": "rewritten headline for target role — specific and achievement-led",
+  "top_bullets": [
+    "Achievement bullet 1 — starts with strong verb, includes specific number or metric",
+    "Achievement bullet 2",
+    "Achievement bullet 3",
+    "Achievement bullet 4",
+    "Achievement bullet 5"
+  ],
+  "summary_paragraph": "3-sentence summary leading with training expertise, not operations. Plain language. No buzzwords."
+}`;
+
+  try {
+    const raw = await callAPIRaw(system, 'Generate the CV rewrite now.', 1000);
+    hideLoading();
+    const cv = JSON.parse(raw.replace(/\`\`\`json|\`\`\`/g,'').trim());
+    state.profileData.cv_rewrite_context = cv;
+    document.getElementById('cv-rewrite-result').style.display = 'block';
+    document.getElementById('cv-rewrite-result').innerHTML = renderCVRewriteOutput(cv);
+  } catch(err) {
+    hideLoading();
+    notify('Could not generate rewrite. Try again.');
+  }
+}
+
+function copyAllBullets() {
+  const cv = state.profileData?.cv_rewrite_context;
+  if (!cv?.top_bullets) return;
+  const text = cv.top_bullets.map((b,i) => `• ${b}`).join('\n');
+  navigator.clipboard.writeText(text).then(() => notify('All bullets copied ✓'));
+}
+
+function copyText(text) {
+  navigator.clipboard.writeText(text).then(() => notify('Copied ✓'));
 }
 
 // ── HIDDEN JOBS MODULE ──
