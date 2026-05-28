@@ -166,6 +166,8 @@
   .outreach-input:focus { outline: none; border-color: var(--accent); }
   .outreach-result { background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 1rem; margin-top: 0.75rem; font-size: 14px; line-height: 1.7; white-space: pre-wrap; }
   .copy-btn { padding: 8px 14px; background: var(--surface); border: 1px solid var(--border2); color: var(--muted); border-radius: 6px; font-size: 12px; cursor: pointer; margin-top: 0.5rem; -webkit-appearance: none; }
+  .company-chip { padding: 7px 12px; background: var(--surface2); border: 1px solid var(--border2); color: var(--muted); border-radius: 20px; font-size: 12px; cursor: pointer; -webkit-appearance: none; transition: all 0.2s; }
+  .company-chip:active { border-color: var(--accent); color: var(--accent); }
   .copy-btn:active { border-color: var(--accent); color: var(--accent); }
 
   /* LOADING & NOTIF */
@@ -258,7 +260,7 @@
 
 <script>
 const API_URL = '/api/chat';
-const SPEAKUP_URL = 'https://speakup.vercel.app';
+const SPEAKUP_URL = 'https://speakup-delta.vercel.app';
 
 const state = {
   cvText: '', messages: [], questionCount: 0,
@@ -289,15 +291,17 @@ Target role, industry, company type. If target doesn't match background, say so 
 Q4 — WHAT IS BLOCKING THEM:
 What they have tried. No callbacks / interviews but no offers / not applying. Diagnose: positioning problem, CV signal problem, or strategy problem.
 
-Q5 — SALARY & CONSTRAINTS:
-Current CTC and what they are hoping for. Hard constraints — location, things they won't do.
-Calculate honestly:
-- Lateral move same role bigger company: 15–25% above current CTC
-- Step-up with proof: 25–40% above current CTC
-- Career change different industry: 0–15% above current CTC (reset is normal)
-- Never more than 40% above current unless exceptional credentials
-- Under 3 years experience: stay conservative
-- If expectation is off, say so with the correct number.
+Q5 — SALARY & CONSTRAINTS (NEVER SKIP — ask this even if CV uploaded):
+Ask both in one message: current CTC, target salary, and hard constraints (location, company types they rule out).
+
+Then PUSH BACK on their salary answer with honesty:
+- Lateral move same role bigger company: 15-25% above current CTC
+- Step-up with strong proof: 25-40% above current CTC
+- Career change different industry: 0-15% above current CTC (reset is normal)
+- Never suggest more than 40% above current unless genuinely exceptional
+- If target is TOO LOW: call it out. "You're on 8.4L. Training Manager at a mid-size company should get you 12-14L, not 10L. Are you anchoring too low?"
+- If target is TOO HIGH: correct it. "20L is not realistic from 8.4L in one move. Expect 11-13L."
+- Make them feel the real number before moving on. This matters.
 
 CRITICAL: After Q5, output the JSON profile immediately. Do NOT ask any more questions. Do NOT say "what would you like to work on". Do NOT continue the conversation. Generate the profile and stop.
 
@@ -573,15 +577,15 @@ function renderProfile(d) {
     <div class="modules-block">
       <div class="modules-block-title">Work on your job search — pick a tool</div>
       <div class="module-tabs">
-        <button class="mod-tab active" onclick="switchModule('interview',this)">🎤 Interview Prep</button>
-        <button class="mod-tab" onclick="switchModule('outreach',this)">📨 Outreach</button>
+        <button class="mod-tab" onclick="switchModule('interview',this)">🎤 Interview Prep</button>
+        <button class="mod-tab active" onclick="switchModule('outreach',this)">📨 Outreach</button>
         <button class="mod-tab" onclick="switchModule('hidden',this)">🔎 Hidden Jobs</button>
       </div>
 
-      <div class="module-panel active" id="mod-interview">
+      <div class="module-panel" id="mod-interview">
         ${renderInterviewModule(d)}
       </div>
-      <div class="module-panel" id="mod-outreach">
+      <div class="module-panel active" id="mod-outreach">
         ${renderOutreachModule(d)}
       </div>
       <div class="module-panel" id="mod-hidden">
@@ -761,14 +765,36 @@ function showInterviewComplete() {
 
 // ── OUTREACH MODULE ──
 function renderOutreachModule(d) {
+  const allCompanies = [...(d.target_companies.tier1||[]), ...(d.target_companies.tier2||[])];
+  const companyButtons = allCompanies.map(c =>
+    `<button class="company-chip" onclick="selectCompany(this,'${c.replace(/'/g,"\'")}')">+ ${c}</button>`
+  ).join('');
+
   return `
-    <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:.875rem">Paste a job description or company name. Get a personalised outreach message written for your background — not a template.</p>
-    <textarea class="outreach-input" id="outreach-input" placeholder="Paste the job description or company name here..."></textarea>
-    <button class="btn-submit" onclick="generateOutreach()">Generate Outreach Message</button>
-    <div id="outreach-result" style="display:none">
+    <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:.875rem">Pick a company from your target list, or paste a job description. The tool writes a personalised message to the hiring manager — not a template. You review it, then send it on LinkedIn.</p>
+    
+    <p style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">Your target companies</p>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem">${companyButtons}</div>
+    
+    <p style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">Or paste a job description</p>
+    <textarea class="outreach-input" id="outreach-input" placeholder="Paste company name, job description, or any context about the role..."></textarea>
+    <button class="btn-submit" onclick="generateOutreach()">Write My Outreach Message</button>
+    
+    <div id="outreach-result" style="display:none;margin-top:1rem">
+      <p style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">Your message — send this on LinkedIn to the hiring manager or L&D head</p>
       <div class="outreach-result" id="outreach-text"></div>
-      <button class="copy-btn" onclick="copyOutreach()">Copy message</button>
+      <div style="display:flex;gap:8px;margin-top:.5rem;flex-wrap:wrap">
+        <button class="copy-btn" onclick="copyOutreach()">Copy message</button>
+        <span style="font-size:12px;color:var(--muted);align-self:center">→ Search LinkedIn for "[Company] Training Manager" or "L&D Head" and send as a connection message</span>
+      </div>
     </div>`;
+}
+
+function selectCompany(btn, company) {
+  document.getElementById('outreach-input').value = company;
+  document.querySelectorAll('.company-chip').forEach(b => b.style.borderColor = '');
+  btn.style.borderColor = 'var(--accent)';
+  btn.style.color = 'var(--accent)';
 }
 
 async function generateOutreach() {
