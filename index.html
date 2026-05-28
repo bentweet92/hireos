@@ -9,160 +9,68 @@
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0a0a0a;
-    --surface: #111;
-    --surface2: #1a1a1a;
-    --border: #2a2a2a;
-    --border2: #333;
-    --text: #f0ede8;
-    --muted: #888;
-    --accent: #e8c547;
-    --accent2: #c8a832;
-    --danger: #e85547;
-    --success: #47c87a;
-    --user-bubble: #1e2a1e;
+    --bg: #0a0a0a; --surface: #111; --surface2: #1a1a1a;
+    --border: #2a2a2a; --border2: #333; --text: #f0ede8;
+    --muted: #888; --accent: #e8c547; --accent2: #c8a832;
+    --danger: #e85547; --success: #47c87a; --user-bubble: #1e2a1e;
+    --speakup: #4a9eff;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; width: 100%; overflow: hidden; background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; font-weight: 300; }
+  #app { display: flex; flex-direction: column; height: 100%; height: 100dvh; width: 100%; overflow: hidden; }
 
-  html, body {
-    height: 100%;
-    width: 100%;
-    overflow: hidden;
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 300;
-  }
-
-  /* Full-screen flex shell — works on all mobile browsers */
-  #app {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    height: 100dvh; /* dynamic viewport — handles Chrome/Safari address bar */
-    width: 100%;
-    overflow: hidden;
-  }
-
-  /* HEADER */
-  header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0 1.25rem;
-    height: 52px;
-    min-height: 52px;
-    border-bottom: 1px solid var(--border);
-    flex-shrink: 0;
-    background: var(--bg);
-    z-index: 10;
-  }
-
+  header { display: flex; align-items: center; justify-content: space-between; padding: 0 1.25rem; height: 52px; min-height: 52px; border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--bg); z-index: 10; }
   .logo { font-family: 'Instrument Serif', serif; font-size: 22px; letter-spacing: -0.5px; }
   .logo span { color: var(--accent); }
-
   .stage-indicator { display: flex; align-items: center; gap: 5px; }
   .stage-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--border2); transition: background 0.3s; }
   .stage-dot.active { background: var(--accent); }
   .stage-dot.done { background: var(--success); }
   .stage-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; margin-left: 5px; }
-
-  /* PROGRESS */
   .progress-bar { height: 2px; background: var(--border); flex-shrink: 0; }
   .progress-fill { height: 100%; background: var(--accent); transition: width 0.5s ease; width: 0%; }
 
-  /* SCREENS */
   main { flex: 1; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
   .screen { display: none; flex-direction: column; flex: 1; min-height: 0; }
   .screen.active { display: flex; }
 
-  /* ── UPLOAD ── */
+  /* UPLOAD */
   #screen-upload { align-items: center; justify-content: center; padding: 1.5rem; overflow-y: auto; }
   .upload-inner { max-width: 480px; width: 100%; text-align: center; }
-
-  .upload-inner h1 {
-    font-family: 'Instrument Serif', serif;
-    font-size: clamp(34px, 7vw, 56px);
-    font-weight: 400; line-height: 1.1;
-    letter-spacing: -1px; margin-bottom: 0.875rem;
-  }
+  .upload-inner h1 { font-family: 'Instrument Serif', serif; font-size: clamp(34px,7vw,56px); font-weight: 400; line-height: 1.1; letter-spacing: -1px; margin-bottom: 0.875rem; }
   .upload-inner h1 em { font-style: italic; color: var(--accent); }
   .upload-inner > p { font-size: 14px; color: var(--muted); line-height: 1.6; margin-bottom: 2rem; }
-
-  .upload-zone {
-    border: 1.5px dashed var(--border2); border-radius: 12px;
-    padding: 2rem 1.5rem; cursor: pointer;
-    transition: all 0.2s; background: var(--surface); margin-bottom: 0.875rem;
-  }
+  .upload-zone { border: 1.5px dashed var(--border2); border-radius: 12px; padding: 2rem 1.5rem; cursor: pointer; transition: all 0.2s; background: var(--surface); margin-bottom: 0.875rem; }
   .upload-zone:hover, .upload-zone.drag { border-color: var(--accent); background: #141200; }
   .upload-icon { font-size: 28px; margin-bottom: 0.625rem; display: block; }
   .upload-zone h3 { font-size: 14px; font-weight: 500; margin-bottom: 3px; }
   .upload-zone p { font-size: 12px; color: var(--muted); margin: 0; }
   #cv-file-input { display: none; }
-
-  .file-selected {
-    display: none; align-items: center; gap: 10px;
-    background: var(--surface2); border: 1px solid var(--border2);
-    border-radius: 8px; padding: 0.625rem 0.875rem;
-    margin-bottom: 0.875rem; text-align: left;
-  }
+  .file-selected { display: none; align-items: center; gap: 10px; background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 0.625rem 0.875rem; margin-bottom: 0.875rem; text-align: left; }
   .file-selected.show { display: flex; }
   .file-name { font-size: 13px; font-weight: 500; flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .file-size { font-size: 11px; color: var(--muted); flex-shrink: 0; }
-
-  .btn-primary {
-    width: 100%; padding: 13px 20px;
-    background: var(--accent); color: #0a0a0a;
-    border: none; border-radius: 8px;
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px; font-weight: 500;
-    cursor: pointer; transition: all 0.2s;
-    display: flex; align-items: center; justify-content: center; gap: 8px;
-    -webkit-appearance: none;
-  }
+  .btn-primary { width: 100%; padding: 13px 20px; background: var(--accent); color: #0a0a0a; border: none; border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 15px; font-weight: 500; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; -webkit-appearance: none; }
   .btn-primary:active { background: var(--accent2); }
   .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+  .skip-link { display: block; margin-top: 0.875rem; font-size: 13px; color: var(--muted); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 
-  .skip-link {
-    display: block; margin-top: 0.875rem;
-    font-size: 13px; color: var(--muted);
-    cursor: pointer; text-decoration: underline; text-underline-offset: 3px;
-  }
-
-  /* ── CHAT ── */
+  /* CHAT */
   #screen-chat { flex-direction: column; }
-
-  .chat-messages {
-    flex: 1; overflow-y: auto;
-    padding: 1rem 1rem 0.5rem;
-    display: flex; flex-direction: column; gap: 0.875rem;
-    scroll-behavior: smooth;
-    -webkit-overflow-scrolling: touch;
-    min-height: 0;
-  }
+  .chat-messages { flex: 1; overflow-y: auto; padding: 1rem 1rem 0.5rem; display: flex; flex-direction: column; gap: 0.875rem; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; min-height: 0; }
   .chat-messages::-webkit-scrollbar { width: 3px; }
   .chat-messages::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
-
   .msg { display: flex; gap: 8px; animation: fadeUp 0.25s ease; }
   @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
   .msg.user { align-self: flex-end; flex-direction: row-reverse; max-width: 88%; }
   .msg.ai { align-self: flex-start; max-width: 92%; }
-
-  .msg-avatar {
-    width: 28px; height: 28px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 12px; flex-shrink: 0; margin-top: 2px; font-weight: 500;
-  }
+  .msg-avatar { width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; margin-top: 2px; font-weight: 500; }
   .msg.ai .msg-avatar { background: var(--accent); color: #0a0a0a; }
   .msg.user .msg-avatar { background: var(--surface2); color: var(--muted); border: 1px solid var(--border2); }
-
   .msg-bubble { padding: 10px 14px; border-radius: 12px; font-size: 14px; line-height: 1.7; }
   .msg.ai .msg-bubble { background: var(--surface); border: 1px solid var(--border); border-radius: 4px 12px 12px 12px; }
   .msg.user .msg-bubble { background: var(--user-bubble); border: 1px solid #2a3a2a; border-radius: 12px 4px 12px 12px; }
   .msg-bubble strong { color: var(--accent); font-weight: 500; }
-
-  /* Typing */
   .typing-indicator { display: none; align-items: center; gap: 8px; }
   .typing-indicator.show { display: flex; }
   .typing-avatar { width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #0a0a0a; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; flex-shrink: 0; }
@@ -171,53 +79,22 @@
   .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
   .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
   @keyframes bounce { 0%,60%,100% { transform: translateY(0); opacity: 0.4; } 30% { transform: translateY(-4px); opacity: 1; } }
-
-  /* Input area — KEY: never shrinks, always visible */
-  .chat-input-area {
-    flex-shrink: 0;
-    border-top: 1px solid var(--border);
-    padding: 0.75rem 1rem;
-    background: var(--bg);
-    /* Safe area for notch/home bar */
-    padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
-  }
-
+  .chat-input-area { flex-shrink: 0; border-top: 1px solid var(--border); padding: 0.75rem 1rem; background: var(--bg); padding-bottom: max(0.75rem, env(safe-area-inset-bottom)); }
   .input-row { display: flex; gap: 8px; align-items: flex-end; max-width: 680px; margin: 0 auto; }
-
-  #user-input {
-    flex: 1; background: var(--surface);
-    border: 1px solid var(--border2); border-radius: 10px;
-    padding: 11px 14px; color: var(--text);
-    font-family: 'DM Sans', sans-serif; font-size: 16px; /* 16px prevents iOS zoom */
-    font-weight: 300; resize: none;
-    min-height: 44px; max-height: 120px;
-    line-height: 1.4; transition: border-color 0.2s;
-    -webkit-appearance: none;
-  }
+  #user-input { flex: 1; background: var(--surface); border: 1px solid var(--border2); border-radius: 10px; padding: 11px 14px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 16px; font-weight: 300; resize: none; min-height: 44px; max-height: 120px; line-height: 1.4; transition: border-color 0.2s; -webkit-appearance: none; }
   #user-input:focus { outline: none; border-color: var(--accent); }
   #user-input::placeholder { color: var(--muted); }
-
-  #send-btn {
-    width: 44px; height: 44px; min-width: 44px;
-    background: var(--accent); border: none; border-radius: 10px;
-    cursor: pointer; display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0; font-size: 18px; color: #0a0a0a;
-    -webkit-appearance: none;
-  }
+  #send-btn { width: 44px; height: 44px; min-width: 44px; background: var(--accent); border: none; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 18px; color: #0a0a0a; -webkit-appearance: none; }
   #send-btn:active { background: var(--accent2); }
   #send-btn:disabled { opacity: 0.3; cursor: not-allowed; }
 
-  .input-hint { text-align: center; margin-top: 5px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--border2); letter-spacing: 0.05em; }
-
-  /* ── PROFILE ── */
+  /* PROFILE */
   #screen-profile { overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 1.25rem; }
   .profile-inner { max-width: 640px; margin: 0 auto; padding-bottom: 2rem; }
-
-  .profile-header { margin-bottom: 1.5rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--border); }
+  .profile-header { margin-bottom: 1.25rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--border); }
   .profile-eyebrow { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.15em; text-transform: uppercase; color: var(--accent); margin-bottom: 0.5rem; }
-  .profile-header h1 { font-family: 'Instrument Serif', serif; font-size: clamp(26px, 5vw, 34px); font-weight: 400; letter-spacing: -0.5px; margin-bottom: 0.25rem; }
+  .profile-header h1 { font-family: 'Instrument Serif', serif; font-size: clamp(26px,5vw,34px); font-weight: 400; letter-spacing: -0.5px; margin-bottom: 0.25rem; }
   .profile-header p { font-size: 12px; color: var(--muted); }
-
   .profile-section { margin-bottom: 1rem; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
   .ps-header { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px; }
   .ps-icon { font-size: 14px; }
@@ -225,21 +102,17 @@
   .ps-body { padding: 1rem; }
   .ps-body p { font-size: 14px; line-height: 1.65; margin-bottom: 0.625rem; }
   .ps-body p:last-child { margin-bottom: 0; }
-
   .target-role-card { background: linear-gradient(135deg,#1a1800,#111); border: 1px solid var(--accent); border-radius: 8px; padding: 1rem; margin-bottom: 0.75rem; }
   .target-role-title { font-family: 'Instrument Serif', serif; font-size: 20px; color: var(--accent); margin-bottom: 3px; }
   .target-role-sub { font-size: 12px; color: var(--muted); }
-
   .salary-display { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1px; background: var(--border); border-radius: 6px; overflow: hidden; margin-bottom: 0.75rem; }
   .salary-cell { background: var(--surface2); padding: 0.875rem; text-align: center; }
   .salary-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; color: var(--muted); text-transform: uppercase; margin-bottom: 3px; }
-  .salary-value { font-family: 'Instrument Serif', serif; font-size: 22px; color: var(--accent); }
-
+  .salary-value { font-family: 'Instrument Serif', serif; font-size: 20px; color: var(--accent); }
   .asset-item { display: flex; gap: 8px; margin-bottom: 0.625rem; align-items: flex-start; }
   .asset-item:last-child { margin-bottom: 0; }
   .asset-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-top: 7px; flex-shrink: 0; }
   .asset-text { font-size: 14px; line-height: 1.6; }
-
   .gap-item { display: flex; gap: 8px; margin-bottom: 0.875rem; align-items: flex-start; }
   .gap-item:last-child { margin-bottom: 0; }
   .gap-tag { font-family: 'DM Mono', monospace; font-size: 9px; padding: 2px 6px; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.08em; flex-shrink: 0; margin-top: 3px; }
@@ -248,31 +121,78 @@
   .gap-tag.risk { background: #2a1a1a; color: var(--danger); }
   .gap-text { font-size: 14px; line-height: 1.6; }
   .gap-action { font-size: 12px; color: var(--muted); margin-top: 2px; }
-
   .action-item { display: flex; gap: 10px; margin-bottom: 0.75rem; align-items: flex-start; }
   .action-item:last-child { margin-bottom: 0; }
   .action-num { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #0a0a0a; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 500; flex-shrink: 0; margin-top: 1px; }
   .action-text { font-size: 14px; line-height: 1.6; }
 
-  .profile-actions { display: flex; gap: 8px; margin-top: 1.25rem; flex-wrap: wrap; }
-  .btn-secondary { flex: 1; padding: 11px 16px; background: var(--surface); color: var(--text); border: 1px solid var(--border2); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; text-align: center; min-width: 120px; -webkit-appearance: none; }
-  .btn-secondary:active { border-color: var(--accent); color: var(--accent); }
+  /* MODULE TABS */
+  .modules-block { background: var(--surface); border: 1px solid var(--accent); border-radius: 10px; padding: 1rem; margin-bottom: 1.25rem; }
+  .modules-block-title { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent); text-transform: uppercase; letter-spacing: .1em; margin-bottom: .75rem; }
+  .module-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 1rem; }
+  .mod-tab { padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; border: 1px solid var(--border2); background: var(--surface2); color: var(--muted); transition: all 0.2s; -webkit-appearance: none; white-space: nowrap; }
+  .mod-tab.active { background: var(--accent); color: #0a0a0a; border-color: var(--accent); }
+  .mod-tab:active { opacity: 0.8; }
+  .module-panel { display: none; }
+  .module-panel.active { display: block; }
 
-  /* LOADING */
+  /* INTERVIEW SIMULATOR */
+  .interview-wrap { background: var(--surface2); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .interview-header { padding: 1rem; border-bottom: 1px solid var(--border); }
+  .interview-q-num { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 6px; }
+  .interview-q-text { font-size: 15px; line-height: 1.6; font-weight: 400; }
+  .interview-body { padding: 1rem; }
+  .interview-textarea { width: 100%; background: var(--surface); border: 1px solid var(--border2); border-radius: 8px; padding: 12px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 300; resize: vertical; min-height: 100px; line-height: 1.6; -webkit-appearance: none; }
+  .interview-textarea:focus { outline: none; border-color: var(--accent); }
+  .interview-actions { display: flex; gap: 8px; margin-top: 0.75rem; align-items: center; flex-wrap: wrap; }
+  .btn-submit { padding: 10px 18px; background: var(--accent); color: #0a0a0a; border: none; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; -webkit-appearance: none; }
+  .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+  .speakup-btn { display: flex; align-items: center; gap: 6px; padding: 10px 14px; background: transparent; border: 1px solid var(--speakup); border-radius: 8px; color: var(--speakup); font-size: 12px; font-weight: 500; cursor: pointer; text-decoration: none; -webkit-appearance: none; }
+  .speakup-btn:active { background: rgba(74,158,255,0.1); }
+  .speakup-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--speakup); animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+  .eval-card { background: var(--surface); border: 1px solid var(--border2); border-radius: 8px; padding: 1rem; margin-top: 0.875rem; }
+  .eval-score { font-family: 'Instrument Serif', serif; font-size: 32px; color: var(--accent); margin-bottom: 6px; }
+  .eval-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.75rem; }
+  .eval-section { margin-bottom: 0.75rem; }
+  .eval-section:last-child { margin-bottom: 0; }
+  .eval-section-title { font-size: 11px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; font-family: 'DM Mono', monospace; }
+  .eval-section-body { font-size: 13px; line-height: 1.65; color: var(--text); }
+  .btn-next { padding: 10px 18px; background: var(--surface); border: 1px solid var(--border2); color: var(--text); border-radius: 8px; font-size: 13px; cursor: pointer; margin-top: 0.75rem; -webkit-appearance: none; }
+  .btn-next:active { border-color: var(--accent); color: var(--accent); }
+
+  /* OUTREACH MODULE */
+  .outreach-input { width: 100%; background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 12px; color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 300; resize: vertical; min-height: 80px; line-height: 1.5; margin-bottom: 0.75rem; -webkit-appearance: none; }
+  .outreach-input:focus { outline: none; border-color: var(--accent); }
+  .outreach-result { background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 1rem; margin-top: 0.75rem; font-size: 14px; line-height: 1.7; white-space: pre-wrap; }
+  .copy-btn { padding: 8px 14px; background: var(--surface); border: 1px solid var(--border2); color: var(--muted); border-radius: 6px; font-size: 12px; cursor: pointer; margin-top: 0.5rem; -webkit-appearance: none; }
+  .copy-btn:active { border-color: var(--accent); color: var(--accent); }
+
+  /* LOADING & NOTIF */
   .loading-overlay { display: none; position: fixed; inset: 0; background: rgba(10,10,10,0.88); z-index: 100; align-items: center; justify-content: center; flex-direction: column; gap: 1rem; }
   .loading-overlay.show { display: flex; }
   .loading-spinner { width: 32px; height: 32px; border: 2px solid var(--border2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
   .loading-text { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
-
-  /* NOTIFICATION */
   .notif { position: fixed; bottom: 1.25rem; left: 50%; transform: translateX(-50%) translateY(10px); background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 0.625rem 1rem; font-size: 13px; z-index: 200; opacity: 0; transition: all 0.3s; white-space: nowrap; pointer-events: none; }
   .notif.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* profile detail toggle */
+  .detail-toggle { font-size: 12px; color: var(--muted); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; margin-bottom: 1rem; display: inline-block; }
+
+  .btn-secondary { padding: 11px 16px; background: var(--surface); color: var(--text); border: 1px solid var(--border2); border-radius: 8px; font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; text-align: center; -webkit-appearance: none; }
+  .btn-secondary:active { border-color: var(--accent); color: var(--accent); }
+
+  @media(max-width:480px) {
+    .salary-display { grid-template-columns: 1fr 1fr; }
+    .salary-display .salary-cell:last-child { grid-column: span 2; }
+    .module-tabs { gap: 4px; }
+    .mod-tab { font-size: 12px; padding: 9px 12px; }
+  }
 </style>
 </head>
 <body>
 <div id="app">
-
   <header>
     <div class="logo">Hire<span>OS</span></div>
     <div class="stage-indicator">
@@ -283,14 +203,13 @@
     </div>
   </header>
   <div class="progress-bar"><div class="progress-fill" id="progress"></div></div>
-
   <main>
 
     <!-- UPLOAD -->
     <div class="screen active" id="screen-upload">
       <div class="upload-inner">
         <h1>Your career,<br><em>decoded.</em></h1>
-        <p>Upload your CV. Answer a few questions. Find out what you're worth and exactly why your search isn't working.</p>
+        <p>Upload your CV. Answer 5 questions. Get your Career Intelligence Profile — what you're worth, what's missing, and why your search isn't working.</p>
         <div class="upload-zone" id="upload-zone">
           <span class="upload-icon">📄</span>
           <h3>Tap to upload your CV</h3>
@@ -315,7 +234,7 @@
           <div class="typing-dots"><span></span><span></span><span></span></div>
         </div>
       </div>
-      <div class="chat-input-area">
+      <div class="chat-input-area" id="chat-input-area">
         <div class="input-row">
           <textarea id="user-input" placeholder="Type your answer..." rows="1"></textarea>
           <button id="send-btn" disabled>↑</button>
@@ -323,7 +242,7 @@
       </div>
     </div>
 
-    <!-- PROFILE -->
+    <!-- PROFILE + MODULES -->
     <div class="screen" id="screen-profile">
       <div class="profile-inner" id="profile-content"></div>
     </div>
@@ -333,122 +252,130 @@
 
 <div class="loading-overlay" id="loading">
   <div class="loading-spinner"></div>
-  <div class="loading-text" id="loading-text">Reading your CV...</div>
+  <div class="loading-text" id="loading-text">Thinking...</div>
 </div>
 <div class="notif" id="notif"></div>
 
 <script>
 const API_URL = '/api/chat';
+const SPEAKUP_URL = 'https://speakup.vercel.app';
 
-const state = { cvText: '', messages: [], questionCount: 0, profileData: null };
+const state = {
+  cvText: '', messages: [], questionCount: 0,
+  profileData: null, profileDone: false,
+  interview: { questions: [], currentQ: 0, evaluations: [] }
+};
 
+// ── SYSTEM PROMPT ──
 function buildSystem() {
   const cv = state.cvText
-    ? `\n\nCANDIDATE CV:\n"""\n${state.cvText}\n"""\n\nYou have already read this CV in full. Question 1 is answered by the CV — do not ask them about their role or background, you already know it. Start from Question 2.`
-    : '\n\nNo CV uploaded. Start with Question 1 — ask them about their current role and what they actually do day to day.';
+    ? `\n\nCANDIDATE CV:\n"""\n${state.cvText}\n"""\n\nYou have read this CV. Q1 is answered — skip it, start from Q2.`
+    : '\n\nNo CV. Start with Q1.';
 
-  return `You are a straight-talking career coach having a real conversation with a job seeker. Your job is to understand their full situation, find what they are underselling, tell them what they are actually worth, and identify exactly why their search is not converting.
-
-TONE — THIS IS THE MOST IMPORTANT INSTRUCTION:
-- Sound like a smart friend who knows the job market. Not a bot. Not a consultant.
-- 2-3 sentences per reply. Never more. Never a wall of text.
-- One question per message. Always exactly one.
-- No corporate filler. No "certainly", "absolutely", "great question", "I'd be happy to". None of it.
-- React like a human. If something is impressive, say so directly. If something doesn't add up, push back.
-- Plain words. Short sentences.
+  return `You are a straight-talking career coach. Real conversation. Short messages — 2-3 sentences max, one question per message. No corporate filler. No "certainly", "absolutely", "great question". React like a human. Plain words.
 ${cv}
 
-YOUR STRUCTURED FLOW — follow this sequence in order, one question per exchange:
+FIVE QUESTIONS IN ORDER:
 
-QUESTION 1 — ROLE & BACKGROUND (skip if CV uploaded, you already know this):
-Ask: what they do, what company, how long they have been there.
-Listen for: gaps between title and actual responsibility. Someone doing a manager's job with a junior title.
+Q1 — ROLE & BACKGROUND (skip if CV uploaded):
+What they do, company, how long. Look for title vs actual responsibility gap.
 
-QUESTION 2 — REAL ACCOMPLISHMENTS (not job description, not CV bullets):
-Ask: what they are genuinely proud of — specific moments, numbers, things they fixed or built. What is one thing they did that was not in their job description but made a real difference?
-Listen for: the hidden asset. The thing they mention casually that is actually significant. When you find it, call it out — "that's actually a big deal, most people don't get to do that."
+Q2 — REAL ACCOMPLISHMENTS:
+One thing they did that is not on their CV but made a real difference. Hunt for the hidden asset — something they mention casually that is actually significant. When you find it: "that's a big deal, most people never get to do that."
 
-QUESTION 3 — WHERE THEY WANT TO GO:
-Ask: what they are targeting — role, industry, type of company. If they are unsure, ask what matters most — more money, different work, bigger company, something else.
-Listen for: whether their target makes sense given their background. If it does not, say so directly and suggest what actually fits them better.
+Q3 — WHERE THEY WANT TO GO:
+Target role, industry, company type. If target doesn't match background, say so directly and suggest what fits better.
 
-QUESTION 4 — WHAT IS BLOCKING THEM:
-Ask: what they have already tried. Are they applying and getting no callbacks? Getting interviews but no offers? Not applying at all? What is the wall they are hitting?
-Listen for: the real diagnosis. Is it positioning (wrong role), signal (CV not matching), or strategy (applying to wrong places)?
+Q4 — WHAT IS BLOCKING THEM:
+What they have tried. No callbacks / interviews but no offers / not applying. Diagnose: positioning problem, CV signal problem, or strategy problem.
 
-QUESTION 5 — SALARY AND CONSTRAINTS:
-Ask two things: what salary they are currently on, and what they are hoping for. Also ask if there are hard constraints — location, things they will not do.
-Listen for: whether their expectation is realistic. Then calculate honestly using this logic:
+Q5 — SALARY & CONSTRAINTS:
+Current CTC and what they are hoping for. Hard constraints — location, things they won't do.
+Calculate honestly:
+- Lateral move same role bigger company: 15–25% above current CTC
+- Step-up with proof: 25–40% above current CTC
+- Career change different industry: 0–15% above current CTC (reset is normal)
+- Never more than 40% above current unless exceptional credentials
+- Under 3 years experience: stay conservative
+- If expectation is off, say so with the correct number.
 
-SALARY CALCULATION RULES — follow these strictly, do not use generic market data:
-- Lateral move to similar role at a bigger company: 15–25% above current CTC. That is the realistic range most companies offer.
-- Step-up in role or seniority with strong proof: 25–40% above current CTC. Only if their experience clearly justifies it.
-- Career change to a different industry: sometimes 0–15% above current CTC. A switch often means accepting a reset temporarily.
-- Never suggest a number more than 40% above current CTC unless they have exceptional, specific credentials that clearly justify it.
-- If they have under 3 years experience, stay conservative. Entry-level markets are tight.
-- Always anchor the estimate to their current salary. A person earning ₹6 LPA realistically targets ₹7–8 LPA for a lateral move or ₹8–9 LPA for a step-up — not ₹15 LPA regardless of role.
-- If their expectation is unrealistic, say so directly with the correct number. Example: "You're on ₹8.4 LPA. A Training Manager move at a bigger company will realistically get you ₹10–12 LPA. ₹15 LPA needs a VP-level role or a company paying top-of-market."
+CRITICAL: After Q5, output the JSON profile immediately. Do NOT ask any more questions. Do NOT say "what would you like to work on". Do NOT continue the conversation. Generate the profile and stop.
 
-AFTER QUESTION 5:
-You now have all 5 answers. Do not ask anything else. Generate the profile immediately.
+CONNECT ALL 5 BEFORE GENERATING:
+- Does target role match their background?
+- Does the blocker explain the pattern?
+- Is salary realistic vs their current CTC and target?
+- What is the one thing they are not seeing?
+Profile must be specific to THIS person. Not generic.
 
-CRITICAL — CONNECT ALL 5 ANSWERS BEFORE GENERATING THE PROFILE:
-Before writing the JSON, internally connect the dots:
-- Does their target role (Q3) match their actual background (Q1+Q2)?
-- Does the blocker they described (Q4) explain why — is it a positioning problem, a CV signal problem, or a strategy problem?
-- Is their salary expectation (Q5) realistic given their current pay, their experience level, and their target role?
-- What is the single most important thing they are not seeing about their own situation?
-The profile must reflect these connections. Every section should feel like it was written specifically for this person's situation — not a generic output that could apply to anyone.
-
-WHEN YOU HAVE ENOUGH INFORMATION, output ONLY this JSON wrapped in the exact tags below. Nothing before it, nothing after it:
+OUTPUT ONLY THIS JSON IN EXACT TAGS:
 <PROFILE_START>
 {
-  "name": "their name or Professional",
+  "name": "name or Professional",
   "target_role": "Specific role title",
   "target_industries": ["Industry 1", "Industry 2"],
-  "profile_summary": "2-3 honest sentences on who this person is and why they are valuable. Plain language.",
-  "hidden_assets": [
-    "Specific thing they underplayed or forgot to mention that is actually valuable",
-    "Another one",
-    "Another one"
-  ],
+  "profile_summary": "2-3 honest sentences. Plain language.",
+  "hidden_assets": ["specific underplayed credential","another","another"],
   "market_value": {
-    "current_ctc": "₹X LPA — what they told you they earn now",
-    "realistic_target": "₹X–Y LPA — calculated as 15-40% above current CTC based on role type and experience",
-    "ceiling": "₹X LPA — only achievable with the right company and strong negotiation",
-    "rationale": "One plain sentence explaining exactly how you calculated this from their current salary and target role"
+    "current_ctc": "₹X LPA",
+    "realistic_target": "₹X–Y LPA",
+    "ceiling": "₹X LPA",
+    "rationale": "One sentence — how you calculated this from their CTC and target role"
   },
   "positioning_gaps": [
-    {"type": "fix", "issue": "Specific problem", "action": "Exact thing to do — one sentence"},
-    {"type": "note", "issue": "Something to be aware of", "action": "How to handle it"},
-    {"type": "risk", "issue": "Real risk in their search", "action": "How to mitigate"}
+    {"type": "fix", "issue": "problem", "action": "exact action"},
+    {"type": "note", "issue": "something to know", "action": "how to handle"},
+    {"type": "risk", "issue": "real risk", "action": "how to mitigate"}
   ],
   "target_companies": {
-    "tier1": ["Company 1", "Company 2", "Company 3"],
-    "tier2": ["Company 1", "Company 2"],
-    "avoid": ["Type of company to avoid — one line reason"]
+    "tier1": ["Company 1","Company 2","Company 3"],
+    "tier2": ["Company 1","Company 2"],
+    "avoid": ["type to avoid — one line reason"]
   },
-  "why_not_converting": "Honest 2-3 sentence answer to why their search is not working. Be specific to their situation.",
-  "next_actions": [
-    "One specific thing to do today — not vague",
-    "One thing to do this week",
-    "One thing to do before applying anywhere"
-  ]
+  "why_not_converting": "Specific 2-3 sentence diagnosis.",
+  "next_actions": ["do today — specific","do this week","do before applying anywhere"],
+  "interview_questions": [
+    {"q": "Behavioral question specific to their target role and background", "what_they_want": "what this question is really testing"},
+    {"q": "Situation-based question for their industry", "what_they_want": "what this question is really testing"},
+    {"q": "Career change question if applicable / strength question", "what_they_want": "what this question is really testing"},
+    {"q": "Competency question based on their target role", "what_they_want": "what this question is really testing"},
+    {"q": "Closing question — future plans / why this role", "what_they_want": "what this question is really testing"}
+  ],
+  "outreach_context": {
+    "role": "their target role",
+    "background_summary": "2 sentence summary of their background for outreach context",
+    "value_proposition": "what specific value they bring — one sentence"
+  }
 }
 <PROFILE_END>`;
 }
 
+// ── API ──
 async function callAPI(messages, maxTokens) {
   const r = await fetch(API_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ messages, system: buildSystem(), max_tokens: maxTokens || 300 })
   });
-  if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.error || `HTTP ${r.status}`); }
-  const d = await r.json();
-  return d.content;
+  if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.error||`HTTP ${r.status}`); }
+  return (await r.json()).content;
 }
 
+async function callAPIRaw(systemPrompt, userContent, maxTokens) {
+  const r = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      messages: [{ role: 'user', content: userContent }],
+      system: systemPrompt,
+      max_tokens: maxTokens || 600
+    })
+  });
+  if (!r.ok) { const e = await r.json().catch(()=>({})); throw new Error(e.error||`HTTP ${r.status}`); }
+  return (await r.json()).content;
+}
+
+// ── PDF ──
 async function readPDF(file) {
   if (!window.pdfjsLib) {
     await loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
@@ -473,6 +400,7 @@ function loadScript(src) {
   });
 }
 
+// ── UI ──
 function setStage(stage) {
   const map = { upload:[1,'Upload CV'], chat:[2,'Diagnostic'], profile:[3,'Your Profile'] };
   const [n, label] = map[stage];
@@ -486,6 +414,13 @@ function setStage(stage) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById(`screen-${stage}`).classList.add('active');
   if (stage === 'chat') setTimeout(scrollBottom, 100);
+  if (stage === 'profile') {
+    // Lock chat permanently — profile is done
+    const inputArea = document.getElementById('chat-input-area');
+    if (inputArea) inputArea.style.display = 'none';
+    document.getElementById('send-btn').disabled = true;
+    state.profileDone = true;
+  }
 }
 
 function showLoading(t) { document.getElementById('loading-text').textContent = t||''; document.getElementById('loading').classList.add('show'); }
@@ -493,38 +428,29 @@ function hideLoading() { document.getElementById('loading').classList.remove('sh
 function showTyping() { document.getElementById('typing').classList.add('show'); scrollBottom(); }
 function hideTyping() { document.getElementById('typing').classList.remove('show'); }
 function scrollBottom() { const c = document.getElementById('chat-messages'); c.scrollTop = c.scrollHeight; }
-
-function notify(text, ms) {
-  const n = document.getElementById('notif');
-  n.textContent = text; n.classList.add('show');
-  setTimeout(() => n.classList.remove('show'), ms||3000);
-}
+function notify(text, ms) { const n = document.getElementById('notif'); n.textContent = text; n.classList.add('show'); setTimeout(()=>n.classList.remove('show'), ms||3000); }
 
 function addMessage(role, text) {
   const container = document.getElementById('chat-messages');
   const typing = document.getElementById('typing');
   const msg = document.createElement('div');
   msg.className = `msg ${role}`;
-  const av = document.createElement('div');
-  av.className = 'msg-avatar';
-  av.textContent = role === 'ai' ? 'H' : 'Y';
-  const bubble = document.createElement('div');
-  bubble.className = 'msg-bubble';
+  const av = document.createElement('div'); av.className = 'msg-avatar'; av.textContent = role==='ai'?'H':'Y';
+  const bubble = document.createElement('div'); bubble.className = 'msg-bubble';
   bubble.innerHTML = text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\n/g,'<br>');
   msg.appendChild(av); msg.appendChild(bubble);
   container.insertBefore(msg, typing);
   setTimeout(scrollBottom, 50);
 }
 
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+function sleep(ms) { return new Promise(r=>setTimeout(r,ms)); }
 
+// ── CHAT ──
 async function startChat() {
   setStage('chat');
   document.getElementById('send-btn').disabled = false;
   showTyping();
-  const opening = state.cvText
-    ? 'I have uploaded my CV. Please start.'
-    : 'I have not uploaded a CV. Please start.';
+  const opening = state.cvText ? 'I have uploaded my CV. Please start.' : 'No CV. Please start.';
   state.messages = [{ role: 'user', content: opening }];
   try {
     const reply = await callAPI(state.messages, 300);
@@ -535,11 +461,14 @@ async function startChat() {
     state.questionCount = 1;
   } catch(err) {
     hideTyping();
-    addMessage('ai', `Connection error: ${err.message}. Please refresh and try again.`);
+    addMessage('ai', `Connection error: ${err.message}. Refresh and try again.`);
   }
 }
 
 async function sendMessage() {
+  // Hard block — if profile is done, ignore all input
+  if (state.profileDone) return;
+
   const input = document.getElementById('user-input');
   const text = input.value.trim();
   if (!text) return;
@@ -552,59 +481,72 @@ async function sendMessage() {
   try {
     const isLast = state.questionCount >= 5;
     const msgs = isLast
-      ? [...state.messages, { role: 'user', content: '[Generate the Career Intelligence Profile JSON now.]' }]
+      ? [...state.messages, { role:'user', content:'[Generate the Career Intelligence Profile JSON now. Output ONLY the JSON tags. No other text.]' }]
       : state.messages;
-    const reply = await callAPI(msgs, isLast ? 2000 : 300);
+    const reply = await callAPI(msgs, isLast ? 2500 : 300);
     hideTyping();
     if (reply.includes('<PROFILE_START>')) {
-      addMessage('ai', "Got everything I need. Putting your profile together now...");
-      await sleep(1000);
+      addMessage('ai', "Got everything I need. Building your profile now...");
+      await sleep(800);
       processProfile(reply);
     } else {
       addMessage('ai', reply);
-      state.messages.push({ role: 'assistant', content: reply });
+      state.messages.push({ role:'assistant', content: reply });
       document.getElementById('send-btn').disabled = false;
     }
   } catch(err) {
     hideTyping();
-    addMessage('ai', `Something went wrong: ${err.message}. Try again.`);
+    addMessage('ai', `Error: ${err.message}. Try again.`);
     document.getElementById('send-btn').disabled = false;
   }
 }
 
+// ── PROFILE ──
 function processProfile(raw) {
   try {
     const match = raw.match(/<PROFILE_START>([\s\S]*?)<PROFILE_END>/);
     if (!match) throw new Error('no tags');
     const data = JSON.parse(match[1].trim());
     state.profileData = data;
+    if (data.interview_questions) state.interview.questions = data.interview_questions;
     showLoading('Building your Career Intelligence Profile...');
     setTimeout(() => { hideLoading(); renderProfile(data); setStage('profile'); }, 1800);
   } catch(err) {
-    console.error(err);
-    regenProfile();
+    console.error(err); regenProfile();
   }
 }
 
 async function regenProfile() {
   showLoading('Generating your profile...');
   try {
-    const msgs = [...state.messages, { role:'user', content:'Generate my Career Intelligence Profile JSON now in the exact format.' }];
-    const reply = await callAPI(msgs, 2000);
+    const msgs = [...state.messages, { role:'user', content:'Generate my Career Intelligence Profile JSON now. Output ONLY the JSON inside the tags.' }];
+    const reply = await callAPI(msgs, 2500);
     hideLoading();
     const match = reply.match(/<PROFILE_START>([\s\S]*?)<PROFILE_END>/);
-    if (match) { const d = JSON.parse(match[1].trim()); state.profileData = d; renderProfile(d); setStage('profile'); }
-    else notify('Could not generate profile. Keep talking and try again.');
+    if (match) {
+      const d = JSON.parse(match[1].trim());
+      state.profileData = d;
+      if (d.interview_questions) state.interview.questions = d.interview_questions;
+      renderProfile(d); setStage('profile');
+    } else notify('Could not generate profile. Keep talking.');
   } catch(err) { hideLoading(); notify('Error. Please refresh.'); }
 }
 
+// ── RENDER PROFILE ──
+// Profile structure: header → MODULE TABS (first thing) → diagnosis details (collapsed by default on mobile)
 function renderProfile(d) {
+  // Determine which module to highlight based on diagnosis
+  const primaryGap = d.positioning_gaps?.[0]?.type || 'fix';
+  const defaultTab = 'interview'; // always start on interview prep
+
   document.getElementById('profile-content').innerHTML = `
     <div class="profile-header">
       <div class="profile-eyebrow">Career Intelligence Profile</div>
       <h1>${d.name}</h1>
       <p>${new Date().toLocaleDateString('en-IN',{day:'numeric',month:'long',year:'numeric'})}</p>
     </div>
+
+    <!-- TARGET ROLE — always visible -->
     <div class="profile-section">
       <div class="ps-header"><span class="ps-icon">🎯</span><span class="ps-title">Target Role</span></div>
       <div class="ps-body">
@@ -615,65 +557,319 @@ function renderProfile(d) {
         <p style="color:var(--muted);font-size:13px">${d.profile_summary}</p>
       </div>
     </div>
+
+    <!-- NEXT 3 ACTIONS — high up, actionable -->
     <div class="profile-section">
-      <div class="ps-header"><span class="ps-icon">💰</span><span class="ps-title">Your Real Market Value</span></div>
-      <div class="ps-body">
-        <div class="salary-display">
-          <div class="salary-cell"><div class="salary-label">Current CTC</div><div class="salary-value" style="font-size:18px;color:var(--muted)">${d.market_value.current_ctc || '—'}</div></div>
-          <div class="salary-cell"><div class="salary-label">Realistic Target</div><div class="salary-value">${d.market_value.realistic_target}</div></div>
-          <div class="salary-cell"><div class="salary-label">Best Case</div><div class="salary-value" style="font-size:18px">${d.market_value.ceiling}</div></div>
+      <div class="ps-header"><span class="ps-icon">→</span><span class="ps-title">Your Next 3 Actions</span></div>
+      <div class="ps-body">${d.next_actions.map((a,i)=>`
+        <div class="action-item">
+          <div class="action-num">${i+1}</div>
+          <div class="action-text">${a}</div>
+        </div>`).join('')}
+      </div>
+    </div>
+
+    <!-- MODULE TABS — immediately after actions, before full diagnosis -->
+    <div class="modules-block">
+      <div class="modules-block-title">Work on your job search — pick a tool</div>
+      <div class="module-tabs">
+        <button class="mod-tab active" onclick="switchModule('interview',this)">🎤 Interview Prep</button>
+        <button class="mod-tab" onclick="switchModule('outreach',this)">📨 Outreach</button>
+        <button class="mod-tab" onclick="switchModule('hidden',this)">🔎 Hidden Jobs</button>
+      </div>
+
+      <div class="module-panel active" id="mod-interview">
+        ${renderInterviewModule(d)}
+      </div>
+      <div class="module-panel" id="mod-outreach">
+        ${renderOutreachModule(d)}
+      </div>
+      <div class="module-panel" id="mod-hidden">
+        ${renderHiddenJobsModule(d)}
+      </div>
+    </div>
+
+    <!-- FULL DIAGNOSIS — below the fold, toggle -->
+    <span class="detail-toggle" onclick="toggleDiagnosis(this)">▼ See full diagnosis</span>
+    <div id="full-diagnosis" style="display:none">
+
+      <div class="profile-section">
+        <div class="ps-header"><span class="ps-icon">💰</span><span class="ps-title">Your Real Market Value</span></div>
+        <div class="ps-body">
+          <div class="salary-display">
+            <div class="salary-cell"><div class="salary-label">Current CTC</div><div class="salary-value" style="font-size:17px;color:var(--muted)">${d.market_value.current_ctc||'—'}</div></div>
+            <div class="salary-cell"><div class="salary-label">Realistic Target</div><div class="salary-value">${d.market_value.realistic_target}</div></div>
+            <div class="salary-cell"><div class="salary-label">Best Case</div><div class="salary-value" style="font-size:17px">${d.market_value.ceiling}</div></div>
+          </div>
+          <p style="font-size:13px;color:var(--muted)">${d.market_value.rationale}</p>
         </div>
-        <p style="font-size:13px;color:var(--muted)">${d.market_value.rationale}</p>
       </div>
-    </div>
-    <div class="profile-section">
-      <div class="ps-header"><span class="ps-icon">💎</span><span class="ps-title">What Your CV Is Missing</span></div>
-      <div class="ps-body">${d.hidden_assets.map(a=>`<div class="asset-item"><div class="asset-dot"></div><div class="asset-text">${a}</div></div>`).join('')}</div>
-    </div>
-    ${d.why_not_converting?`<div class="profile-section"><div class="ps-header"><span class="ps-icon">🔍</span><span class="ps-title">Why Your Search Isn't Converting</span></div><div class="ps-body"><p>${d.why_not_converting}</p></div></div>`:''}
-    <div class="profile-section">
-      <div class="ps-header"><span class="ps-icon">⚡</span><span class="ps-title">What to Fix</span></div>
-      <div class="ps-body">${d.positioning_gaps.map(g=>`<div class="gap-item"><span class="gap-tag ${g.type}">${g.type}</span><div class="gap-text"><strong style="color:var(--text)">${g.issue}</strong><div class="gap-action">${g.action}</div></div></div>`).join('')}</div>
-    </div>
-    <div class="profile-section">
-      <div class="ps-header"><span class="ps-icon">🏢</span><span class="ps-title">Where to Apply</span></div>
-      <div class="ps-body">
-        <p style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.625rem">Priority</p>
-        ${d.target_companies.tier1.map(c=>`<div class="asset-item"><div class="asset-dot"></div><div class="asset-text">${c}</div></div>`).join('')}
-        <p style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em;margin:.75rem 0 .625rem">Also worth trying</p>
-        ${d.target_companies.tier2.map(c=>`<div class="asset-item"><div class="asset-dot" style="background:var(--border2)"></div><div class="asset-text">${c}</div></div>`).join('')}
-        ${d.target_companies.avoid?.length?`<p style="font-size:11px;color:var(--danger);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em;margin:.75rem 0 .625rem">Skip for now</p>${d.target_companies.avoid.map(c=>`<div class="asset-item"><div class="asset-dot" style="background:var(--danger)"></div><div class="asset-text" style="color:var(--muted)">${c}</div></div>`).join('')}`:''}
+
+      <div class="profile-section">
+        <div class="ps-header"><span class="ps-icon">💎</span><span class="ps-title">What Your CV Is Missing</span></div>
+        <div class="ps-body">${d.hidden_assets.map(a=>`<div class="asset-item"><div class="asset-dot"></div><div class="asset-text">${a}</div></div>`).join('')}</div>
       </div>
-    </div>
-    <div class="profile-section">
-      <div class="ps-header"><span class="ps-icon">→</span><span class="ps-title">Next 3 Actions</span></div>
-      <div class="ps-body">${d.next_actions.map((a,i)=>`<div class="action-item"><div class="action-num">${i+1}</div><div class="action-text">${a}</div></div>`).join('')}</div>
-    </div>
-    <div class="profile-actions">
-      <button class="btn-secondary" onclick="continueChat()">💬 Keep Going</button>
+
+      ${d.why_not_converting?`<div class="profile-section"><div class="ps-header"><span class="ps-icon">🔍</span><span class="ps-title">Why Your Search Isn't Converting</span></div><div class="ps-body"><p>${d.why_not_converting}</p></div></div>`:''}
+
+      <div class="profile-section">
+        <div class="ps-header"><span class="ps-icon">⚡</span><span class="ps-title">What to Fix</span></div>
+        <div class="ps-body">${d.positioning_gaps.map(g=>`<div class="gap-item"><span class="gap-tag ${g.type}">${g.type}</span><div class="gap-text"><strong style="color:var(--text)">${g.issue}</strong><div class="gap-action">${g.action}</div></div></div>`).join('')}</div>
+      </div>
+
+      <div class="profile-section">
+        <div class="ps-header"><span class="ps-icon">🏢</span><span class="ps-title">Where to Apply</span></div>
+        <div class="ps-body">
+          <p style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.625rem">Priority</p>
+          ${d.target_companies.tier1.map(c=>`<div class="asset-item"><div class="asset-dot"></div><div class="asset-text">${c}</div></div>`).join('')}
+          <p style="font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em;margin:.75rem 0 .625rem">Also worth trying</p>
+          ${d.target_companies.tier2.map(c=>`<div class="asset-item"><div class="asset-dot" style="background:var(--border2)"></div><div class="asset-text">${c}</div></div>`).join('')}
+          ${d.target_companies.avoid?.length?`<p style="font-size:11px;color:var(--danger);font-family:'DM Mono',monospace;text-transform:uppercase;letter-spacing:.08em;margin:.75rem 0 .625rem">Skip for now</p>${d.target_companies.avoid.map(c=>`<div class="asset-item"><div class="asset-dot" style="background:var(--danger)"></div><div class="asset-text" style="color:var(--muted)">${c}</div></div>`).join('')}`:''}
+        </div>
+      </div>
+
+    </div><!-- /full-diagnosis -->
+
+    <div style="margin-top:1.5rem">
       <button class="btn-secondary" onclick="startOver()">↺ Start Over</button>
     </div>`;
 }
 
-function continueChat() {
-  setStage('chat');
-  addMessage('ai', "What do you want to work on — rewriting your CV, interview prep, or how to approach companies?");
-  document.getElementById('send-btn').disabled = false;
+function toggleDiagnosis(el) {
+  const diag = document.getElementById('full-diagnosis');
+  const visible = diag.style.display !== 'none';
+  diag.style.display = visible ? 'none' : 'block';
+  el.textContent = visible ? '▼ See full diagnosis' : '▲ Hide diagnosis';
 }
 
+function switchModule(name, btn) {
+  document.querySelectorAll('.mod-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.module-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById(`mod-${name}`).classList.add('active');
+}
+
+// ── INTERVIEW MODULE ──
+function renderInterviewModule(d) {
+  const qs = state.interview.questions;
+  if (!qs || qs.length === 0) return `<p style="color:var(--muted);font-size:14px">No questions available.</p>`;
+  return `
+    <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:.875rem">5 questions tailored to your target role. Answer each one, get scored, then practice speaking it in SpeakUp.</p>
+    <div class="interview-wrap" id="interview-wrap">
+      ${renderQuestion(0)}
+    </div>`;
+}
+
+function renderQuestion(idx) {
+  const qs = state.interview.questions;
+  if (idx >= qs.length) return renderInterviewComplete();
+  const q = qs[idx];
+  const ev = state.interview.evaluations[idx];
+  return `
+    <div class="interview-header">
+      <div class="interview-q-num">Question ${idx+1} of ${qs.length}</div>
+      <div class="interview-q-text">${q.q}</div>
+      ${q.what_they_want ? `<div style="font-size:12px;color:var(--muted);margin-top:6px;font-style:italic">Testing: ${q.what_they_want}</div>` : ''}
+    </div>
+    <div class="interview-body">
+      ${ev ? renderEval(ev, idx) : `
+        <textarea class="interview-textarea" id="interview-answer" placeholder="Type your answer here..."></textarea>
+        <div class="interview-actions">
+          <button class="btn-submit" id="submit-answer-btn" onclick="submitAnswer(${idx})">Submit Answer</button>
+          <a class="speakup-btn" href="${SPEAKUP_URL}?q=${encodeURIComponent(q.q)}" target="_blank">
+            <div class="speakup-dot"></div>Practice in SpeakUp
+          </a>
+        </div>`}
+    </div>`;
+}
+
+function renderEval(ev, idx) {
+  const qs = state.interview.questions;
+  return `
+    <div class="eval-card">
+      <div class="eval-label">Your Score</div>
+      <div class="eval-score">${ev.score}/100</div>
+      <div class="eval-section"><div class="eval-section-title">What you did well</div><div class="eval-section-body">${ev.strengths}</div></div>
+      <div class="eval-section"><div class="eval-section-title">What was missing</div><div class="eval-section-body">${ev.gaps}</div></div>
+      <div class="eval-section"><div class="eval-section-title">Model answer</div><div class="eval-section-body">${ev.model_answer}</div></div>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:.75rem">
+      ${idx < qs.length - 1
+        ? `<button class="btn-next" onclick="nextQuestion(${idx+1})">Next Question →</button>`
+        : `<button class="btn-next" onclick="showInterviewComplete()">See Results →</button>`}
+      <a class="speakup-btn" href="${SPEAKUP_URL}?q=${encodeURIComponent(qs[idx].q)}" target="_blank">
+        <div class="speakup-dot"></div>Practice speaking this
+      </a>
+    </div>`;
+}
+
+function renderInterviewComplete() {
+  const avg = Math.round(state.interview.evaluations.reduce((s,e)=>s+e.score,0) / state.interview.evaluations.length);
+  return `
+    <div class="interview-header">
+      <div class="interview-q-num">All done</div>
+      <div class="interview-q-text">You completed all 5 questions.</div>
+    </div>
+    <div class="interview-body">
+      <div class="eval-card">
+        <div class="eval-label">Average Score</div>
+        <div class="eval-score">${avg}/100</div>
+        <div class="eval-section-body" style="color:var(--muted);font-size:13px">
+          ${avg >= 80 ? "Strong. Focus on delivery now — practice speaking each answer in SpeakUp." :
+            avg >= 60 ? "Decent foundation. Review model answers for questions where you scored under 70." :
+            "More practice needed. Go through the model answers, then redo your weakest 2 questions."}
+        </div>
+      </div>
+      <a class="speakup-btn" style="margin-top:.75rem;display:inline-flex" href="${SPEAKUP_URL}" target="_blank">
+        <div class="speakup-dot"></div>Continue in SpeakUp
+      </a>
+    </div>`;
+}
+
+async function submitAnswer(idx) {
+  const answer = document.getElementById('interview-answer')?.value?.trim();
+  if (!answer) { notify('Write your answer first.'); return; }
+  const btn = document.getElementById('submit-answer-btn');
+  if (btn) btn.disabled = true;
+  showLoading('Evaluating your answer...');
+  const q = state.interview.questions[idx];
+  const d = state.profileData;
+  const system = `You are a rigorous but fair interview coach. Evaluate this candidate's answer to an interview question for a ${d.target_role} role.
+Candidate background: ${d.outreach_context?.background_summary || d.profile_summary}
+Respond ONLY with this JSON, nothing else:
+{"score": number 0-100, "strengths": "1-2 sentences", "gaps": "1-2 sentences on what was missing", "model_answer": "strong 3-4 sentence answer using their actual background"}`;
+  try {
+    const raw = await callAPIRaw(system, `Question: ${q.q}\n\nAnswer: ${answer}`, 800);
+    hideLoading();
+    const ev = JSON.parse(raw.replace(/```json|```/g,'').trim());
+    state.interview.evaluations[idx] = ev;
+    document.getElementById('interview-wrap').innerHTML = renderQuestion(idx);
+  } catch(err) {
+    hideLoading(); notify('Could not evaluate. Try again.');
+    if (btn) btn.disabled = false;
+  }
+}
+
+function nextQuestion(idx) {
+  state.interview.currentQ = idx;
+  document.getElementById('interview-wrap').innerHTML = renderQuestion(idx);
+}
+
+function showInterviewComplete() {
+  document.getElementById('interview-wrap').innerHTML = renderInterviewComplete();
+}
+
+// ── OUTREACH MODULE ──
+function renderOutreachModule(d) {
+  return `
+    <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:.875rem">Paste a job description or company name. Get a personalised outreach message written for your background — not a template.</p>
+    <textarea class="outreach-input" id="outreach-input" placeholder="Paste the job description or company name here..."></textarea>
+    <button class="btn-submit" onclick="generateOutreach()">Generate Outreach Message</button>
+    <div id="outreach-result" style="display:none">
+      <div class="outreach-result" id="outreach-text"></div>
+      <button class="copy-btn" onclick="copyOutreach()">Copy message</button>
+    </div>`;
+}
+
+async function generateOutreach() {
+  const input = document.getElementById('outreach-input')?.value?.trim();
+  if (!input) { notify('Paste a job description or company name first.'); return; }
+  showLoading('Writing your outreach message...');
+  const d = state.profileData;
+  const system = `You are writing a personalised outreach message for a job seeker.
+Background: ${d.outreach_context?.background_summary || d.profile_summary}
+Target role: ${d.target_role}
+Value they bring: ${d.outreach_context?.value_proposition || ''}
+Write a short, direct outreach message (6-8 sentences) to a hiring manager or connection.
+- Open with a specific observation about the company or role
+- Mention one specific thing from their background that is directly relevant
+- End with a clear, low-friction ask — a 15-minute call
+- Sound like a human. No corporate filler.
+- No bullet points. Flowing message only.
+Output only the message text. Nothing else.`;
+  try {
+    const msg = await callAPIRaw(system, `Context: ${input}`, 400);
+    hideLoading();
+    document.getElementById('outreach-text').textContent = msg;
+    document.getElementById('outreach-result').style.display = 'block';
+  } catch(err) { hideLoading(); notify('Error. Try again.'); }
+}
+
+function copyOutreach() {
+  const text = document.getElementById('outreach-text')?.textContent;
+  if (text) navigator.clipboard.writeText(text).then(()=>notify('Copied ✓'));
+}
+
+// ── HIDDEN JOBS MODULE ──
+function renderHiddenJobsModule(d) {
+  return `
+    <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:.875rem">Most jobs are never posted. Companies in motion — new funding, new cities, new products — often hire before the job goes live. Get in before the queue forms.</p>
+    <div class="profile-section" style="margin-bottom:.875rem">
+      <div class="ps-header"><span class="ps-icon">💡</span><span class="ps-title">The Approach</span></div>
+      <div class="ps-body">
+        ${[
+          ['Find companies in motion','Search LinkedIn, MoneyControl, YourStory for recent funding rounds, city expansions, executive hires. These signal headcount growth before jobs are posted.'],
+          ['Understand their current friction','Read recent news and Glassdoor reviews. What problem are they solving right now? What does someone in your target role help fix?'],
+          ['Arrive with value, not a CV','Find the hiring manager on LinkedIn. Send a message that shows you understand their situation and explains how your background is relevant.'],
+          ['Skip HR for the first message','HR manages posted-job pipelines. The VP or Director of your target department decides whether to create a role. Go there first.']
+        ].map(([title,text],i)=>`
+          <div class="action-item">
+            <div class="action-num">${i+1}</div>
+            <div class="action-text"><strong style="color:var(--text)">${title}.</strong> ${text}</div>
+          </div>`).join('')}
+      </div>
+    </div>
+    <textarea class="outreach-input" id="hidden-company-input" placeholder="Paste a company name or recent news about them..."></textarea>
+    <button class="btn-submit" onclick="generateProofOfWork()">Generate Proof-of-Work Outreach</button>
+    <div id="pow-result" style="display:none">
+      <div class="outreach-result" id="pow-text"></div>
+      <button class="copy-btn" onclick="copyPOW()">Copy message</button>
+    </div>`;
+}
+
+async function generateProofOfWork() {
+  const input = document.getElementById('hidden-company-input')?.value?.trim();
+  if (!input) { notify('Paste company info first.'); return; }
+  showLoading('Building your Proof of Work outreach...');
+  const d = state.profileData;
+  const system = `You are helping a job seeker approach a company that has not posted a job yet.
+Candidate: ${d.outreach_context?.background_summary || d.profile_summary}
+Target role: ${d.target_role}
+Their key value: ${d.outreach_context?.value_proposition || ''}
+Write a short outreach message (6-8 sentences) to the relevant VP or department head.
+1. Open with a specific researched observation about the company
+2. Identify one problem or growth challenge they are likely facing
+3. Connect that directly to something in the candidate's background
+4. End with a specific easy ask — "would a 15-minute call make sense?"
+No bullet points. No filler. Sound like a thoughtful professional.
+Output only the message. Nothing else.`;
+  try {
+    const msg = await callAPIRaw(system, `Company context: ${input}`, 450);
+    hideLoading();
+    document.getElementById('pow-text').textContent = msg;
+    document.getElementById('pow-result').style.display = 'block';
+  } catch(err) { hideLoading(); notify('Error. Try again.'); }
+}
+
+function copyPOW() {
+  const text = document.getElementById('pow-text')?.textContent;
+  if (text) navigator.clipboard.writeText(text).then(()=>notify('Copied ✓'));
+}
+
+// ── START OVER ──
 function startOver() {
-  Object.assign(state,{cvText:'',messages:[],questionCount:0,profileData:null});
+  Object.assign(state, { cvText:'', messages:[], questionCount:0, profileData:null, profileDone:false, interview:{ questions:[], currentQ:0, evaluations:[] } });
   document.getElementById('chat-messages').innerHTML = `<div class="typing-indicator" id="typing"><div class="typing-avatar">H</div><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
   document.getElementById('file-selected').classList.remove('show');
   document.getElementById('start-btn').disabled = true;
+  document.getElementById('chat-input-area').style.display = '';
   setStage('upload');
 }
 
-// UPLOAD
+// ── UPLOAD ──
 const uploadZone = document.getElementById('upload-zone');
 const fileInput  = document.getElementById('cv-file-input');
 const startBtn   = document.getElementById('start-btn');
-
 uploadZone.addEventListener('click', () => fileInput.click());
 uploadZone.addEventListener('dragover', e => { e.preventDefault(); uploadZone.classList.add('drag'); });
 uploadZone.addEventListener('dragleave', () => uploadZone.classList.remove('drag'));
@@ -699,21 +895,12 @@ async function handleFile(file) {
 startBtn.addEventListener('click', startChat);
 document.getElementById('skip-link').addEventListener('click', () => { state.cvText=''; startChat(); });
 
-// INPUT — keyboard handling for all devices
 const userInput = document.getElementById('user-input');
 const sendBtn   = document.getElementById('send-btn');
-
-userInput.addEventListener('keydown', e => {
-  if (e.key==='Enter' && !e.shiftKey) { e.preventDefault(); if(!sendBtn.disabled) sendMessage(); }
-});
-userInput.addEventListener('input', () => {
-  userInput.style.height = 'auto';
-  userInput.style.height = Math.min(userInput.scrollHeight, 120) + 'px';
-});
+userInput.addEventListener('keydown', e => { if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); if(!sendBtn.disabled) sendMessage(); } });
+userInput.addEventListener('input', () => { userInput.style.height='auto'; userInput.style.height=Math.min(userInput.scrollHeight,120)+'px'; });
 sendBtn.addEventListener('click', sendMessage);
-
-// Prevent body scroll bounce on iOS when input is focused
-document.addEventListener('touchmove', e => { if(e.target === document.body) e.preventDefault(); }, { passive: false });
+document.addEventListener('touchmove', e => { if(e.target===document.body) e.preventDefault(); }, { passive: false });
 </script>
 </body>
 </html>
