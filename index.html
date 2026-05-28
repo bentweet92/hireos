@@ -212,7 +212,7 @@
 <body>
 <div id="app">
   <header>
-    <div class="logo">Hire<span>OS</span></div>
+    <div class="logo" onclick="goHome()" style="cursor:pointer" title="Start Over">Hire<span>OS</span></div>
     <div class="stage-indicator">
       <div class="stage-dot active" id="dot-1"></div>
       <div class="stage-dot" id="dot-2"></div>
@@ -238,6 +238,7 @@
           <span>📄</span>
           <span class="file-name" id="file-name">—</span>
           <span class="file-size" id="file-size">—</span>
+          <button onclick="clearFile()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 4px;line-height:1" title="Remove file">✕</button>
         </div>
         <button class="btn-primary" id="start-btn" disabled>Start My Diagnostic →</button>
         <span class="skip-link" id="skip-link">Continue without CV</span>
@@ -286,54 +287,71 @@ const state = {
 
 // ── SYSTEM PROMPT ──
 function buildSystem() {
-  const cv = state.cvText
-    ? `\n\nCANDIDATE CV:\n"""\n${state.cvText}\n"""\n\nYou have read this CV. Q1 is answered — skip it, start from Q2.`
-    : '\n\nNo CV. Start with Q1.';
+  const cvBlock = state.cvText
+    ? `\n\nCANDIDATE CV:\n"""\n${state.cvText}\n"""\n`
+    : '';
 
-  return `You are a straight-talking career coach. Real conversation. Short messages — 2-3 sentences max, one question per message. No corporate filler. No "certainly", "absolutely", "great question". React like a human. Plain words.
-${cv}
+  return `You are a straight-talking career diagnostic coach. Short messages — 2-3 sentences max per message. No corporate filler. No "certainly", "absolutely", "great question". Sound like a human. Plain words.
+${cvBlock}
 
-FIVE QUESTIONS IN ORDER:
+YOUR JOB IN THIS CONVERSATION:
+Ask targeted questions, then generate a precise Career Intelligence Profile. The profile must be specific to THIS person — not generic advice that could apply to anyone.
 
-Q1 — ROLE & BACKGROUND (skip if CV uploaded):
-What they do, company, how long. Look for title vs actual responsibility gap.
+PHASE 1 — CV SCAN (do this silently before asking anything):
+If a CV was provided, read it carefully and identify:
+- What role does this CV actually position them for right now? (not what their title says — what does the content signal?)
+- What is ambiguous or missing? (e.g. title says one thing, responsibilities say another; education section blank or absent; gap between stated role and actual work done)
+- What are 2-3 things you genuinely need to know that the CV doesn't answer?
+Those become your dynamic questions. Do NOT ask things the CV already answers clearly.
 
-Q2 — REAL ACCOMPLISHMENTS:
-One thing they did that is not on their CV but made a real difference. Hunt for the hidden asset — something they mention casually that is actually significant. When you find it: "that's a big deal, most people never get to do that."
+PHASE 2 — DYNAMIC QUESTIONS (2-3 questions, based on what the CV left unclear):
+Ask only what you actually need. Make each question specific to what you found in their CV.
+Examples of good targeted questions (use these as a guide, not a script):
+- "Your CV shows L&D work inside a financial services company — are you trying to stay in FS or move to a pure L&D role in a different industry? That completely changes how we position you."
+- "Your title says Operations Manager but most of your bullets are about training teams. Which one do you actually want to do next — run operations, or build and run training programs?"
+- "You've worked at [Company] for X years — are you looking to move to a similar-size company or are you targeting larger/smaller?"
+- "Your CV mentions [specific achievement] briefly — tell me more about that. How many people, what outcome, over what timeframe?"
+Do NOT ask generic questions like "what are your accomplishments" or "what's blocking you" if the CV already gives you enough to diagnose those.
 
-Q3 — WHERE THEY WANT TO GO:
-Target role, industry, company type. If target doesn't match background, say so directly and suggest what fits better.
+PHASE 3 — SALARY & LOCATION (always ask, never skip, ask in one message):
+"What's your current CTC, and what salary are you hoping for in this next role? Also — any hard location constraints or company types you'd rule out?"
 
-Q4 — WHAT IS BLOCKING THEM:
-What they have tried. No callbacks / interviews but no offers / not applying. Diagnose: positioning problem, CV signal problem, or strategy problem.
-
-Q5 — SALARY & CONSTRAINTS (NEVER SKIP — ask this even if CV uploaded):
-Ask both in one message: current CTC, target salary, and hard constraints (location, company types they rule out).
-
-Then PUSH BACK on their salary answer with honesty:
+Then respond honestly to their salary answer:
 - Lateral move same role bigger company: 15-25% above current CTC
-- Step-up with strong proof: 25-40% above current CTC
-- Career change different industry: 0-15% above current CTC (reset is normal)
-- Never suggest more than 40% above current unless genuinely exceptional
-- If target is TOO LOW: call it out. "You're on 8.4L. Training Manager at a mid-size company should get you 12-14L, not 10L. Are you anchoring too low?"
-- If target is TOO HIGH: correct it. "20L is not realistic from 8.4L in one move. Expect 11-13L."
-- Make them feel the real number before moving on. This matters.
+- Step-up with strong proof: 25-40% above current CTC  
+- Career change to different industry: 0-15% above current CTC (reset is normal, tell them)
+- Never suggest more than 40% jump unless genuinely exceptional credentials
+- If they anchor too low: "You're on X. For [target role] at a [size] company, realistic is Y-Z. Are you undervaluing yourself?"
+- If they anchor too high: "X isn't realistic in one move from your current CTC. Expect Y-Z."
+- Always show the math. Make them feel the real number.
 
-CRITICAL: After Q5, output the JSON profile immediately. Do NOT ask any more questions. Do NOT say "what would you like to work on". Do NOT continue the conversation. Generate the profile and stop.
+AFTER SALARY ANSWER: Generate the profile immediately. Do NOT ask more questions.
 
-CONNECT ALL 5 BEFORE GENERATING:
-- Does target role match their background?
-- Does the blocker explain the pattern?
-- Is salary realistic vs their current CTC and target?
-- What is the one thing they are not seeing?
-Profile must be specific to THIS person. Not generic.
+DEGREE / EDUCATION LOGIC — READ THIS CAREFULLY:
+- If the CV does NOT mention degree status anywhere: do NOT assume graduation is a blocker. ATS can only filter what's written. A CV silent on degree passes most ATS filters. Do not flag this as a risk unless the user explicitly raised it.
+- If the CV explicitly states no degree, or has a blank education section: then flag it — but only as one factor among others, not the primary blocker.
+- If the user mentioned degree as a blocker in their answers: use their words, not your assumption.
+- The real diagnostic question is: if the CV is silent on degree and they're still not getting calls, what ELSE explains it? Go there instead.
 
-COMPANY LIST RULES — apply before writing target_companies:
-- If graduation filter / degree requirement is flagged as a blocker or risk: large MNCs (TCS, Infosys, Wipro, Accenture, Capgemini, IBM, Cognizant) go into "avoid", NOT tier1 or tier2. They use ATS with mandatory degree filters.
-- tier1 = companies most likely to hire on experience over degree: mid-size BPOs, travel companies, regional firms, growing startups with 200-1000 employees.
-- tier2 = larger companies that sometimes make exceptions, or companies in adjacent industries worth trying.
-- avoid = be specific about WHY, not just "traditional MNCs". Example: "Large MNCs like TCS/Wipro — strict ATS degree filter will auto-reject before human review."
-- next_actions must NOT include "rewrite CV" or "find employees on LinkedIn" as a manual task — the tool handles CV rewriting, and LinkedIn search is handled in the Outreach tab. Instead: actions should be about which company to approach first, what role title to search for, what to say when asked about degree.
+INDUSTRY RULES:
+- Only list industries the user explicitly mentioned, or that directly and obviously match their CV content.
+- Do NOT add EdTech, Healthcare, Retail, FMCG or any other industry as a guess. If it's not in the CV or their answers, leave it out.
+
+BEFORE GENERATING THE PROFILE — connect everything:
+- What does the CV signal vs what does the user want? Is there a gap?
+- What did their answers reveal that the CV didn't show?
+- What is the single most likely reason their search isn't converting? (Be specific — not "positioning" generically, but exactly what signal the CV is sending and why that's wrong for their target)
+- Is the salary expectation realistic given their CTC and the type of move they're making?
+- Are the companies you're recommending actually likely to hire this person given everything you now know?
+
+COMPANY LIST RULES:
+- Only put a company in tier1 if they are genuinely likely to hire this person given their background AND constraints.
+- If degree is a known blocker: large MNCs with strict ATS (TCS, Infosys, Wipro, Accenture, Cognizant, Capgemini) go in avoid with specific reason.
+- If degree is NOT a confirmed blocker: don't penalise them — put appropriate companies in tier1/tier2.
+- tier1 = highest probability of callback given this specific person's profile.
+- tier2 = worth trying, slightly harder fit.
+- avoid = specific companies or types with specific reason why.
+- next_actions must NOT say "rewrite CV" (the tool does that) or "search LinkedIn" (the Outreach tab does that). Actions should be: which company to approach first and exactly how, what job title to search for, what to prepare for the most likely objection.
 
 OUTPUT ONLY THIS JSON IN EXACT TAGS:
 <PROFILE_START>
@@ -489,10 +507,12 @@ async function startChat() {
   setStage('chat');
   document.getElementById('send-btn').disabled = false;
   showTyping();
-  const opening = state.cvText ? 'I have uploaded my CV. Please start.' : 'No CV. Please start.';
+  const opening = state.cvText
+    ? 'I have uploaded my CV. Please scan it and ask me your targeted questions.'
+    : 'No CV uploaded. Please ask me what you need to know.';
   state.messages = [{ role: 'user', content: opening }];
   try {
-    const reply = await callAPI(state.messages, 300);
+    const reply = await callAPI(state.messages, 400);
     hideTyping();
     if (reply.includes('<PROFILE_START>')) { processProfile(reply); return; }
     addMessage('ai', reply);
@@ -518,18 +538,22 @@ async function sendMessage() {
   state.questionCount++;
   showTyping();
   try {
-    const isLast = state.questionCount >= 5;
-    const msgs = isLast
-      ? [...state.messages, { role:'user', content:'[Generate the Career Intelligence Profile JSON now. Output ONLY the JSON tags. No other text.]' }]
+    // After salary answer (typically 3rd-4th exchange), nudge profile generation
+    // but let the AI decide — it will output PROFILE_START when ready
+    const msgs = state.questionCount >= 3
+      ? [...state.messages, { role:'user', content:'[If you have asked your targeted questions AND received the salary/location answer, generate the Career Intelligence Profile JSON now. If you still need the salary answer, ask it first.]' }]
       : state.messages;
-    const reply = await callAPI(msgs, isLast ? 3500 : 300);
+    const tokenLimit = state.questionCount >= 3 ? 3500 : 350;
+    const reply = await callAPI(msgs, tokenLimit);
     hideTyping();
     if (reply.includes('<PROFILE_START>')) {
       addMessage('ai', "Got everything I need. Building your profile now...");
       await sleep(800);
       processProfile(reply);
     } else {
-      addMessage('ai', reply);
+      // Strip any accidental [bracketed system notes] from AI reply before showing
+      const cleanReply = reply.replace(/\[.*?\]/g, '').trim();
+      addMessage('ai', cleanReply);
       state.messages.push({ role:'assistant', content: reply });
       document.getElementById('send-btn').disabled = false;
     }
@@ -919,7 +943,13 @@ function renderCVRewriteOutput(cv) {
     </div>
 
     <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:.875rem;margin-top:.75rem">
-      <p style="font-size:12px;color:var(--muted);line-height:1.6">These bullets are written for your target role. When asked about your degree in an interview, lead with: <em style="color:var(--text)">"My experience includes [specific achievement] — I'd welcome a conversation about how that translates."</em> Don't apologise for it.</p>
+      <p style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">How to beat the ATS degree filter</p>
+      <p style="font-size:12px;color:var(--muted);line-height:1.7">ATS systems can only filter what's written. If your CV doesn't say "no degree", it has nothing to reject. <strong style="color:var(--text)">Do not mention degree status anywhere on your CV.</strong> Lead with years of experience, certifications, and these achievement bullets. Most ATS systems will pass a CV scoring 70%+ on other criteria even if the degree field is blank.<br><br>If a job application has a knockout question "Do you have a degree? Yes/No" — skip that application and approach the company directly through LinkedIn instead. That bypasses the ATS entirely.<br><br>When asked in an interview: <em style="color:var(--text)">"I've built and run training programs across 3 countries over 15 years — I'm happy to walk you through the outcomes."</em> Don't apologise. Redirect to proof.</p>
+    </div>
+
+    <div style="margin-top:.875rem">
+      <p style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">Copy everything at once</p>
+      <button class="btn-submit" onclick="copyFullCVSection()" style="width:100%">Copy Full CV Section</button>
     </div>`;
 }
 
@@ -958,6 +988,14 @@ Generate a CV rewrite in this EXACT JSON format, nothing else:
     hideLoading();
     notify('Could not generate rewrite. Try again.');
   }
+}
+
+function copyFullCVSection() {
+  const cv = state.profileData?.cv_rewrite_context;
+  if (!cv) return;
+  const bullets = (cv.top_bullets||[]).map(b => `• ${b}`).join('\n');
+  const full = `HEADLINE\n${cv.target_headline||''}\n\nSUMMARY\n${cv.summary_paragraph||''}\n\nKEY ACHIEVEMENTS\n${bullets}`;
+  navigator.clipboard.writeText(full).then(() => notify('Full CV section copied ✓'));
 }
 
 function copyAllBullets() {
@@ -1025,6 +1063,24 @@ Output only the message. Nothing else.`;
 function copyPOW() {
   const text = document.getElementById('pow-text')?.textContent;
   if (text) navigator.clipboard.writeText(text).then(()=>notify('Copied ✓'));
+}
+
+// ── HOME / CLEAR ──
+function goHome() {
+  if (state.profileDone || state.questionCount > 0) {
+    if (!confirm('Start over? Your current session will be cleared.')) return;
+  }
+  startOver();
+}
+
+function clearFile() {
+  state.cvText = '';
+  document.getElementById('file-selected').classList.remove('show');
+  document.getElementById('file-name').textContent = '—';
+  document.getElementById('file-size').textContent = '—';
+  document.getElementById('cv-file-input').value = '';
+  document.getElementById('start-btn').disabled = true;
+  notify('CV removed');
 }
 
 // ── START OVER ──
