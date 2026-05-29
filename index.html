@@ -330,7 +330,11 @@ function buildSystem() {
     ? `\n\nCANDIDATE CV:\n"""\n${state.cvText}\n"""\n`
     : '';
 
+  const today = new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+
   return `You are a straight-talking career diagnostic coach. Short messages — 2-3 sentences max per message. No corporate filler. No "certainly", "absolutely", "great question". Sound like a human. Plain words.
+
+TODAY'S DATE: ${today}. Use this when evaluating dates in the CV — do not flag dates as "future" if they are on or before today.
 ${cvBlock}
 
 YOUR JOB IN THIS CONVERSATION:
@@ -600,9 +604,9 @@ async function sendMessage() {
     // After salary answer (typically 3rd-4th exchange), nudge profile generation
     // but let the AI decide — it will output PROFILE_START when ready
     const msgs = state.questionCount >= 3
-      ? [...state.messages, { role:'user', content:'[If you have asked your targeted questions AND received the salary/location answer, generate the Career Intelligence Profile JSON now. If you still need the salary answer, ask it first.]' }]
+      ? [...state.messages, { role:'user', content:'[If you have asked your targeted questions AND received the salary/location answer, generate the Career Intelligence Profile JSON now. Output ONLY the JSON between the tags — no other text before or after. If you still need the salary answer, ask it first.]' }]
       : state.messages;
-    const tokenLimit = state.questionCount >= 3 ? 3500 : 350;
+    const tokenLimit = state.questionCount >= 3 ? 5000 : 350;
     const reply = await callAPI(msgs, tokenLimit);
     hideTyping();
     if (reply.includes('<PROFILE_START>')) {
@@ -626,23 +630,46 @@ async function sendMessage() {
 // ── PROFILE ──
 function processProfile(raw) {
   try {
-    const match = raw.match(/<PROFILE_START>([\s\S]*?)<PROFILE_END>/);
+    // Try exact tags first
+    let match = raw.match(/<PROFILE_START>([\s\S]*?)<PROFILE_END>/);
+
+    // Fallback: try PROFILE_START without closing tag (truncated response)
+    if (!match) {
+      const startIdx = raw.indexOf('<PROFILE_START>');
+      if (startIdx !== -1) {
+        const partial = raw.slice(startIdx + 15).trim();
+        // Try to find a valid JSON object in the partial content
+        const jsonMatch = partial.match(/(\{[\s\S]*\})/);
+        if (jsonMatch) {
+          match = [null, jsonMatch[1]];
+        }
+      }
+    }
+
     if (!match) throw new Error('no tags');
-    const data = JSON.parse(match[1].trim());
+
+    let jsonStr = match[1].trim();
+    // Clean up common JSON issues — trailing commas before } or ]
+    jsonStr = jsonStr.replace(/,(\s*[}\]])/g, '$1');
+
+    const data = JSON.parse(jsonStr);
     state.profileData = data;
     if (data.interview_questions) state.interview.questions = data.interview_questions;
     showLoading('Building your Career Intelligence Profile...');
     setTimeout(() => { hideLoading(); renderProfile(data); setStage('profile'); }, 1800);
   } catch(err) {
-    console.error(err); regenProfile();
+    console.error('processProfile error:', err);
+    // Show user a message instead of silent failure, then try regen
+    addMessage('ai', "Almost there — just finishing your profile...");
+    setTimeout(regenProfile, 500);
   }
 }
 
 async function regenProfile() {
   showLoading('Generating your profile...');
   try {
-    const msgs = [...state.messages, { role:'user', content:'Generate my Career Intelligence Profile JSON now. Output ONLY the JSON inside the tags.' }];
-    const reply = await callAPI(msgs, 3500);
+    const msgs = [...state.messages, { role:'user', content:'Generate the Career Intelligence Profile JSON now. Output ONLY this: <PROFILE_START> then the complete JSON object then <PROFILE_END>. No other text. No explanation. Just the tags and JSON.' }];
+    const reply = await callAPI(msgs, 5000);
     hideLoading();
     const match = reply.match(/<PROFILE_START>([\s\S]*?)<PROFILE_END>/);
     if (match) {
