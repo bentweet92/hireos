@@ -195,6 +195,45 @@
   .notif { position: fixed; bottom: 1.25rem; left: 50%; transform: translateX(-50%) translateY(10px); background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: 0.625rem 1rem; font-size: 13px; z-index: 200; opacity: 0; transition: all 0.3s; white-space: nowrap; pointer-events: none; }
   .notif.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+  /* OUTREACH FLOW */
+  .branch-buttons { display: flex; flex-direction: column; gap: 8px; margin-top: .75rem; }
+  .branch-btn { display: flex; align-items: center; gap: 12px; padding: .875rem 1rem; background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; cursor: pointer; text-align: left; transition: all 0.2s; -webkit-appearance: none; width: 100%; }
+  .branch-btn:hover, .branch-btn.active { border-color: var(--accent); background: #141200; }
+  .branch-btn:active { opacity: 0.8; }
+  .branch-icon { font-size: 20px; flex-shrink: 0; }
+  .branch-title { font-size: 13px; font-weight: 500; color: var(--text); }
+  .branch-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .branch-btn-small { padding: 8px 14px; background: var(--surface2); border: 1px solid var(--border2); color: var(--text); border-radius: 6px; font-size: 12px; cursor: pointer; -webkit-appearance: none; }
+  .branch-btn-small:active { border-color: var(--accent); color: var(--accent); }
+  .outreach-step-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: .1em; margin-bottom: .75rem; }
+  .outreach-step { animation: fadeUp 0.25s ease; }
+  .hook-suggestion { background: var(--surface2); border: 1px solid var(--accent); border-radius: 8px; padding: .875rem; margin-bottom: .75rem; }
+  .send-instruction-box { background: var(--surface2); border: 1px solid var(--border2); border-radius: 8px; padding: .875rem; font-size: 13px; line-height: 1.7; color: var(--muted); }
+  .send-instruction-box strong { color: var(--text); }
+  .company-chip.selected { border-color: var(--accent); color: var(--accent); }
+  .company-chip.tier1 { border-color: var(--accent); color: var(--text); }
+
+  /* PIPELINE */
+  .pipeline-table-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid var(--border); }
+  .pipeline-table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .pipeline-table th { padding: .5rem .75rem; text-align: left; font-family: 'DM Mono', monospace; font-size: 9px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); background: var(--surface2); border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .pipeline-table td { padding: .625rem .75rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .pipeline-row:last-child td { border-bottom: none; }
+  .pipeline-company { font-weight: 500; font-size: 13px; white-space: nowrap; }
+  .pipeline-muted { color: var(--muted); font-size: 11px; }
+  .pipeline-action { color: var(--muted); font-size: 11px; max-width: 160px; }
+  .pipeline-date { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
+  .pipeline-date-active { color: var(--accent); }
+  .pipeline-status-select { background: var(--surface2); border: 1px solid var(--border2); border-radius: 4px; padding: 4px 6px; font-size: 11px; cursor: pointer; font-family: 'DM Sans', sans-serif; max-width: 160px; }
+  .pipeline-status-select:focus { outline: none; border-color: var(--accent); }
+
+  /* STEP TABS */
+  .mod-step { display: flex; align-items: center; gap: 6px; }
+  .step-num { width: 18px; height: 18px; border-radius: 50%; background: var(--border2); color: var(--muted); font-size: 10px; display: flex; align-items: center; justify-content: center; font-weight: 500; flex-shrink: 0; }
+  .mod-tab.active .step-num { background: #0a0a0a; color: #0a0a0a; }
+  .mod-locked { opacity: 0.4; cursor: not-allowed !important; }
+  .mod-locked:active { opacity: 0.4; }
+
   /* profile detail toggle */
   .detail-toggle { font-size: 12px; color: var(--muted); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; margin-bottom: 1rem; display: inline-block; }
 
@@ -654,25 +693,33 @@ function renderProfile(d) {
 
     <!-- MODULE TABS — immediately after actions, before full diagnosis -->
     <div class="modules-block">
-      <div class="modules-block-title">Work on your job search — pick a tool</div>
+      <div class="modules-block-title">Your job search — work through these in order</div>
       <div class="module-tabs">
-        <button class="mod-tab" onclick="switchModule('interview',this)">🎤 Interview Prep</button>
-        <button class="mod-tab active" onclick="switchModule('outreach',this)">📨 Outreach</button>
-        <button class="mod-tab" onclick="switchModule('cv',this)">📝 CV Rewrite</button>
-        <button class="mod-tab" onclick="switchModule('hidden',this)">🔎 Hidden Jobs</button>
+        <button class="mod-tab mod-step active" onclick="switchModule('cv',this)" data-step="1">
+          <span class="step-num">1</span> CV Rewrite
+        </button>
+        <button class="mod-tab mod-step" onclick="switchModule('outreach',this)" data-step="2">
+          <span class="step-num">2</span> Outreach
+        </button>
+        <button class="mod-tab mod-step" onclick="switchModule('pipeline',this)" data-step="3">
+          <span class="step-num">3</span> Pipeline
+        </button>
+        <button class="mod-tab mod-step mod-locked" id="tab-interview" onclick="switchModule('interview',this)" data-step="4">
+          <span class="step-num">4</span> Interview Prep
+        </button>
       </div>
 
-      <div class="module-panel" id="mod-interview">
-        ${renderInterviewModule(d)}
-      </div>
-      <div class="module-panel active" id="mod-outreach">
-        ${renderOutreachModule(d)}
-      </div>
-      <div class="module-panel" id="mod-cv">
+      <div class="module-panel active" id="mod-cv">
         ${renderCVRewriteModule(d)}
       </div>
-      <div class="module-panel" id="mod-hidden">
-        ${renderHiddenJobsModule(d)}
+      <div class="module-panel" id="mod-outreach">
+        ${renderOutreachModule(d)}
+      </div>
+      <div class="module-panel" id="mod-pipeline">
+        ${renderPipelineModule(d)}
+      </div>
+      <div class="module-panel" id="mod-interview">
+        ${renderInterviewModule(d)}
       </div>
     </div>
 
@@ -730,10 +777,21 @@ function toggleDiagnosis(el) {
 }
 
 function switchModule(name, btn) {
+  if (btn.classList.contains('mod-locked')) {
+    notify('Complete your outreach first. Mark a company as "Replied" or "Call scheduled" to unlock Interview Prep.');
+    return;
+  }
   document.querySelectorAll('.mod-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('.module-panel').forEach(p => p.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById(`mod-${name}`).classList.add('active');
+  const panel = document.getElementById('mod-'+name);
+  if (panel) {
+    panel.classList.add('active');
+    // Re-render pipeline on tab switch so it stays fresh
+    if (name === 'pipeline' && state.profileData) {
+      panel.innerHTML = renderPipelineHTML();
+    }
+  }
 }
 
 // ── INTERVIEW MODULE ──
@@ -847,66 +905,381 @@ function showInterviewComplete() {
 }
 
 // ── OUTREACH MODULE ──
+// State for current outreach session
+const outreachState = { company: '', branch: '', hook: '', generatedMsg: '' };
+
 function renderOutreachModule(d) {
-  const allCompanies = [...(d.target_companies.tier1||[]), ...(d.target_companies.tier2||[])];
-  const companyButtons = allCompanies.map(c =>
-    `<button class="company-chip" onclick="selectCompany(this,'${c.replace(/'/g,"\'")}')">+ ${c}</button>`
-  ).join('');
+  const tier1 = (d.target_companies.tier1||[]);
+  const tier2 = (d.target_companies.tier2||[]);
+  const allCompanies = [...tier1, ...tier2];
+
+  const chips = allCompanies.map(c => {
+    const isTier1 = tier1.includes(c);
+    return `<button class="company-chip${isTier1 ? ' tier1' : ''}" onclick="startOutreach('${c.replace(/'/g,"\'")}',this)">${c}${isTier1 ? ' ★' : ''}</button>`;
+  }).join('');
 
   return `
-    <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:.875rem">Pick a company from your target list, or paste a job description. The tool writes a personalised message to the hiring manager — not a template. You review it, then send it on LinkedIn.</p>
-    
-    <p style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">Your target companies</p>
-    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1rem">${companyButtons}</div>
-    
-    <p style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">Or paste a job description</p>
-    <textarea class="outreach-input" id="outreach-input" placeholder="Paste company name, job description, or any context about the role..."></textarea>
-    <button class="btn-submit" onclick="generateOutreach()">Write My Outreach Message</button>
-    
-    <div id="outreach-result" style="display:none;margin-top:1rem">
-      <p style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">Your message — send this on LinkedIn to the hiring manager or L&D head</p>
-      <div class="outreach-result" id="outreach-text"></div>
-      <div style="display:flex;gap:8px;margin-top:.5rem;flex-wrap:wrap">
-        <button class="copy-btn" onclick="copyOutreach()">Copy message</button>
-        <span style="font-size:12px;color:var(--muted);align-self:center">→ Search LinkedIn for "[Company] Training Manager" or "L&D Head" and send as a connection message</span>
+    <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:1rem">Pick a target company to start your outreach playbook. The tool asks two quick questions, then writes the right message for your situation — not a template.</p>
+
+    <p style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">★ Priority targets — highest callback probability</p>
+    <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:1.25rem" id="company-chips">${chips}</div>
+
+    <div id="outreach-flow" style="display:none">
+      <!-- Step 1: Branch selection -->
+      <div id="outreach-step1" class="outreach-step">
+        <div class="outreach-step-label">Step 1 of 3 — Your situation at <span id="company-name-display" style="color:var(--accent)"></span></div>
+        <div class="branch-buttons">
+          <button class="branch-btn" onclick="selectBranch('live')">
+            <div class="branch-icon">📋</div>
+            <div class="branch-title">There is a live job posting</div>
+            <div class="branch-sub">I found a relevant role on LinkedIn/Naukri</div>
+          </button>
+          <button class="branch-btn" onclick="selectBranch('cold')">
+            <div class="branch-icon">🔍</div>
+            <div class="branch-title">No posting — reaching out cold</div>
+            <div class="branch-sub">No live role, but I want to get on their radar</div>
+          </button>
+          <button class="branch-btn" onclick="selectBranch('warm')">
+            <div class="branch-icon">🤝</div>
+            <div class="branch-title">I have a connection there</div>
+            <div class="branch-sub">I know someone who works there or knows someone who does</div>
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 2: Hook confirmation -->
+      <div id="outreach-step2" class="outreach-step" style="display:none">
+        <div class="outreach-step-label">Step 2 of 3 — Your hook</div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:.75rem">We identified this as your strongest result for this company. This is the one line that makes your message stand out. Confirm it or edit it.</p>
+        <div class="hook-suggestion" id="hook-suggestion-box">
+          <div style="font-family:'DM Mono',monospace;font-size:10px;color:var(--accent);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">From your CV — your hook</div>
+          <div id="hook-text" style="font-size:14px;line-height:1.6;margin-bottom:.75rem"></div>
+        </div>
+        <textarea class="outreach-input" id="hook-edit" placeholder="Edit your hook here if needed..."></textarea>
+        <div style="display:flex;gap:8px;margin-top:.5rem">
+          <button class="btn-submit" onclick="confirmHook()">Use this hook →</button>
+        </div>
+      </div>
+
+      <!-- Step 3: Generated message + send instructions -->
+      <div id="outreach-step3" class="outreach-step" style="display:none">
+        <div class="outreach-step-label">Step 3 of 3 — Your message</div>
+        <div id="send-instructions" class="send-instructions"></div>
+        <div class="outreach-result" id="outreach-text" style="margin-top:.75rem;white-space:pre-wrap"></div>
+        <div style="display:flex;gap:8px;margin-top:.75rem;flex-wrap:wrap">
+          <button class="btn-submit" onclick="copyOutreach()">Copy message</button>
+          <button class="btn-secondary" onclick="markSent()">✓ I sent this</button>
+        </div>
+        <div id="sent-confirm" style="display:none;margin-top:.75rem">
+          <div class="outreach-step-label">Which message did you send?</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:.5rem">
+            <button class="branch-btn-small" onclick="logSent('connection-note')">Connection note (short)</button>
+            <button class="branch-btn-small" onclick="logSent('inmail')">Full InMail (long)</button>
+            <button class="branch-btn-small" onclick="logSent('intro-request')">Intro request via mutual</button>
+          </div>
+        </div>
       </div>
     </div>`;
 }
 
-function selectCompany(btn, company) {
-  document.getElementById('outreach-input').value = company;
-  document.querySelectorAll('.company-chip').forEach(b => b.style.borderColor = '');
-  btn.style.borderColor = 'var(--accent)';
-  btn.style.color = 'var(--accent)';
+async function startOutreach(company, btn) {
+  outreachState.company = company;
+  outreachState.branch = '';
+  outreachState.hook = '';
+  outreachState.generatedMsg = '';
+
+  document.querySelectorAll('.company-chip').forEach(b => { b.classList.remove('selected'); });
+  btn.classList.add('selected');
+
+  document.getElementById('company-name-display').textContent = company;
+  document.getElementById('outreach-flow').style.display = 'block';
+  document.getElementById('outreach-step1').style.display = 'block';
+  document.getElementById('outreach-step2').style.display = 'none';
+  document.getElementById('outreach-step3').style.display = 'none';
+
+  document.getElementById('outreach-flow').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
-async function generateOutreach() {
-  const input = document.getElementById('outreach-input')?.value?.trim();
-  if (!input) { notify('Paste a job description or company name first.'); return; }
-  showLoading('Writing your outreach message...');
+async function selectBranch(branch) {
+  outreachState.branch = branch;
+  document.querySelectorAll('.branch-btn').forEach(b => b.classList.remove('active'));
+  event.target.closest('.branch-btn').classList.add('active');
+
+  // Pre-fill hook from CV data
+  showLoading('Finding your strongest hook...');
   const d = state.profileData;
-  const system = `You are writing a personalised outreach message for a job seeker.
-Background: ${d.outreach_context?.background_summary || d.profile_summary}
+  const hookSystem = `You are identifying the single strongest hook for a cold outreach message.
+
+Candidate background: ${d.outreach_context?.background_summary || d.profile_summary}
 Target role: ${d.target_role}
-Value they bring: ${d.outreach_context?.value_proposition || ''}
-Write a short, direct outreach message (6-8 sentences) to a hiring manager or connection.
-- Open with a specific observation about the company or role
-- Mention one specific thing from their background that is directly relevant
-- End with a clear, low-friction ask — a 15-minute call
-- Sound like a human. No corporate filler.
-- No bullet points. Flowing message only.
-Output only the message text. Nothing else.`;
+Target company: ${outreachState.company}
+Hidden assets: ${(d.hidden_assets||[]).join(', ')}
+Achievement bullets from CV: ${(d.cv_rewrite_context?.top_bullets||[]).slice(0,3).join(' | ')}
+
+Identify ONE specific result or achievement from their background that is most directly relevant to what ${outreachState.company} cares about.
+Output ONLY: a single sentence starting with a past-tense verb. Example: "Built contact center training infrastructure for 65 agents across 2 sites, cutting ramp time from 12 to 7 weeks."
+No preamble. No explanation. Just the one sentence.`;
+
   try {
-    const msg = await callAPIRaw(system, `Context: ${input}`, 400);
+    const hook = await callAPIRaw(hookSystem, `Find the best hook for ${outreachState.company}`, 120);
     hideLoading();
-    document.getElementById('outreach-text').textContent = msg;
-    document.getElementById('outreach-result').style.display = 'block';
-  } catch(err) { hideLoading(); notify('Error. Try again.'); }
+    outreachState.hook = hook.trim();
+    document.getElementById('hook-text').textContent = outreachState.hook;
+    document.getElementById('hook-edit').value = outreachState.hook;
+    document.getElementById('outreach-step1').style.display = 'none';
+    document.getElementById('outreach-step2').style.display = 'block';
+  } catch(err) {
+    hideLoading();
+    document.getElementById('hook-text').textContent = 'Describe your strongest relevant result in one sentence.';
+    document.getElementById('hook-edit').value = '';
+    document.getElementById('outreach-step1').style.display = 'none';
+    document.getElementById('outreach-step2').style.display = 'block';
+  }
+}
+
+async function confirmHook() {
+  const editedHook = document.getElementById('hook-edit').value.trim();
+  if (!editedHook) { notify('Add your hook first.'); return; }
+  outreachState.hook = editedHook;
+
+  showLoading('Writing your message...');
+  const d = state.profileData;
+
+  let branchInstructions = '';
+  let sendInstructions = '';
+
+  if (outreachState.branch === 'live') {
+    branchInstructions = `This person has found a live job posting at ${outreachState.company}. Write a message that:
+1. Opens with a specific observation about the company or role (not "I saw your job posting")
+2. Uses this hook as the key proof point: "${outreachState.hook}"
+3. Mentions they applied through the portal and this message is to ensure a human sees it
+4. Ends with: "Would a 5-minute call make sense, or should I send across anything else?"
+Keep it under 100 words. Natural, direct tone.`;
+    sendInstructions = `<strong>Apply first</strong> → then find the <strong>Hiring Manager or L&D Head</strong> on LinkedIn (search: "${outreachState.company} Training Manager" or "Head L&D ${outreachState.company}"). Send as a connection request note. The message confirms your application — it gets a human to see it before the ATS buries it.`;
+
+  } else if (outreachState.branch === 'cold') {
+    branchInstructions = `This person is reaching out cold — no live job posting. Write a message that:
+1. Opens with a specific, researched observation about ${outreachState.company}'s current situation or growth
+2. Uses this hook as the proof point: "${outreachState.hook}"
+3. Does NOT ask for a job — asks for a perspective or a brief conversation
+4. Ends with: "Would a 15-minute call make sense?"
+Keep it under 120 words. Peer-to-peer tone, not job-seeker tone.`;
+    sendInstructions = `Find the <strong>VP Training, Head of L&D, or Operations Director</strong> at ${outreachState.company} on LinkedIn (search: "Head Learning ${outreachState.company}" or "VP Operations ${outreachState.company}"). Send as a <strong>connection request with this note</strong> (LinkedIn limits connection notes to 300 characters — use the short version). If they accept without replying, follow up in 3 days with one sentence asking if they have 15 minutes.`;
+
+  } else {
+    branchInstructions = `This person has a mutual connection at ${outreachState.company}. Write a message to send to THEIR MUTUAL CONTACT (not the hiring manager) asking for a warm introduction. The message should:
+1. Reference the mutual contact by name if possible, or use "[Name]"
+2. Briefly explain what they're looking for at ${outreachState.company}
+3. Use this as the reason they'd be relevant: "${outreachState.hook}"
+4. Ask for an introduction — specific, easy, low-pressure
+Keep it under 80 words. Friendly tone, not formal.`;
+    sendInstructions = `Send this to your <strong>mutual contact</strong> first — not to the hiring manager. A warm introduction converts at 5x a cold message. Once they make the intro, follow up with a separate note to the hiring manager referencing the introduction.`;
+  }
+
+  const system = `You are writing a highly personalised outreach message for a mid-career professional.
+Candidate: ${d.outreach_context?.background_summary || d.profile_summary}
+Target role: ${d.target_role}
+Target company: ${outreachState.company}
+
+${branchInstructions}
+
+Output ONLY the message text. No subject line. No preamble. No explanation.`;
+
+  try {
+    const msg = await callAPIRaw(system, `Write the outreach message now.`, 300);
+    hideLoading();
+    outreachState.generatedMsg = msg.trim();
+
+    document.getElementById('send-instructions').innerHTML = `<div class="send-instruction-box">${sendInstructions}</div>`;
+    document.getElementById('outreach-text').textContent = outreachState.generatedMsg;
+    document.getElementById('outreach-step2').style.display = 'none';
+    document.getElementById('outreach-step3').style.display = 'block';
+  } catch(err) {
+    hideLoading();
+    notify('Error generating message. Try again.');
+  }
+}
+
+function markSent() {
+  document.getElementById('sent-confirm').style.display = 'block';
+  document.getElementById('sent-confirm').scrollIntoView({ behavior: 'smooth' });
+}
+
+function logSent(variant) {
+  const company = outreachState.company;
+  const branch = outreachState.branch;
+  const today = new Date();
+  const followUpDate = new Date(today.getTime() + 5 * 24 * 60 * 60 * 1000);
+  const followUpStr = followUpDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+
+  // Add to pipeline
+  addToPipeline({
+    company,
+    status: 'Message sent',
+    lastAction: `Sent ${variant.replace(/-/g,' ')} (${branch})`,
+    nextStepBy: followUpStr,
+    nextAction: 'Check for reply — follow up if no response',
+    daysAgo: 0
+  });
+
+  document.getElementById('sent-confirm').innerHTML = `
+    <div style="background:var(--surface2);border:1px solid var(--success);border-radius:8px;padding:.875rem;margin-top:.5rem">
+      <p style="font-size:13px;color:var(--success);font-weight:500;margin-bottom:.25rem">✓ Logged — message sent to ${company}</p>
+      <p style="font-size:12px;color:var(--muted)">Follow-up reminder set for ${followUpStr}. Check your Pipeline tab to track progress.</p>
+      <button class="btn-next" style="margin-top:.5rem" onclick="switchModuleByName('pipeline')">View Pipeline →</button>
+    </div>`;
+
+  // Set 5-day reminder check
+  setTimeout(() => {
+    notify(`Did ${company} reply? Check your pipeline.`, 6000);
+  }, 100);
+
+  notify('Logged ✓ Check Pipeline for follow-up date');
 }
 
 function copyOutreach() {
   const text = document.getElementById('outreach-text')?.textContent;
   if (text) navigator.clipboard.writeText(text).then(()=>notify('Copied ✓'));
+}
+
+function switchModuleByName(name) {
+  const tabMap = { cv: 0, outreach: 1, pipeline: 2, interview: 3 };
+  const tabs = document.querySelectorAll('.mod-tab');
+  const idx = tabMap[name];
+  if (tabs[idx]) switchModule(name, tabs[idx]);
+}
+
+// ── PIPELINE MODULE ──
+let pipelineData = [];
+
+function addToPipeline(entry) {
+  const existing = pipelineData.findIndex(p => p.company === entry.company);
+  if (existing >= 0) {
+    pipelineData[existing] = { ...pipelineData[existing], ...entry };
+  } else {
+    pipelineData.push(entry);
+  }
+  // Re-render pipeline if visible
+  const panel = document.getElementById('mod-pipeline');
+  if (panel && panel.classList.contains('active')) {
+    panel.innerHTML = renderPipelineHTML();
+  }
+}
+
+function renderPipelineModule(d) {
+  // Pre-populate with target companies if pipeline is empty
+  if (pipelineData.length === 0) {
+    const companies = [...(d.target_companies?.tier1||[]), ...(d.target_companies?.tier2||[])];
+    companies.slice(0, 6).forEach(c => {
+      pipelineData.push({
+        company: c,
+        status: 'Not started',
+        lastAction: '—',
+        nextStepBy: '—',
+        nextAction: 'Go to Outreach tab to start',
+        daysAgo: null
+      });
+    });
+  }
+  return renderPipelineHTML();
+}
+
+function renderPipelineHTML() {
+  const statusColors = {
+    'Not started': 'var(--muted)',
+    'Message sent': 'var(--accent)',
+    'Replied': 'var(--success)',
+    'Call scheduled': 'var(--success)',
+    'Applied': '#4a9eff',
+    'No response — follow up': 'var(--danger)',
+    'Closed': 'var(--border2)'
+  };
+
+  const statuses = ['Not started','Message sent','Applied','Replied','Call scheduled','No response — follow up','Closed'];
+  const statusOptions = statuses.map(s => `<option value="${s}">${s}</option>`).join('');
+
+  const rows = pipelineData.map((p, i) => {
+    const color = statusColors[p.status] || 'var(--muted)';
+    const isActive = p.status !== 'Not started' && p.status !== 'Closed';
+    return `
+      <tr class="pipeline-row" data-idx="${i}">
+        <td class="pipeline-company">${p.company}</td>
+        <td>
+          <select class="pipeline-status-select" onchange="updatePipelineStatus(${i}, this.value)" style="color:${color}">
+            ${statuses.map(s => `<option value="${s}"${s===p.status?' selected':''}>${s}</option>`).join('')}
+          </select>
+        </td>
+        <td class="pipeline-muted">${p.lastAction}</td>
+        <td class="pipeline-date${isActive ? ' pipeline-date-active' : ''}">${p.nextStepBy}</td>
+        <td class="pipeline-muted pipeline-action">${p.nextAction}</td>
+      </tr>`;
+  }).join('');
+
+  return `
+    <p style="font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:1rem">Track every company you are pursuing. Update status after each action. The table sorts by next step date — your most urgent follow-up is always at the top.</p>
+
+    <div class="pipeline-table-wrap">
+      <table class="pipeline-table">
+        <thead>
+          <tr>
+            <th>Company</th>
+            <th>Status</th>
+            <th>Last Action</th>
+            <th>Follow Up By</th>
+            <th>Next Action</th>
+          </tr>
+        </thead>
+        <tbody id="pipeline-tbody">${rows}</tbody>
+      </table>
+    </div>
+
+    <div style="margin-top:1rem;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn-secondary" onclick="switchModuleByName('outreach')" style="font-size:12px">+ Start outreach for a company</button>
+      <span style="font-size:11px;color:var(--muted);align-self:center">Interview Prep unlocks when you mark a company as "Call scheduled"</span>
+    </div>`;
+}
+
+function updatePipelineStatus(idx, newStatus) {
+  if (!pipelineData[idx]) return;
+  pipelineData[idx].status = newStatus;
+  pipelineData[idx].lastAction = `Status updated to: ${newStatus}`;
+
+  const today = new Date();
+  if (newStatus === 'Message sent') {
+    const followUp = new Date(today.getTime() + 5 * 24 * 60 * 60 * 1000);
+    pipelineData[idx].nextStepBy = followUp.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+    pipelineData[idx].nextAction = 'Check for reply — if none, send follow-up';
+  } else if (newStatus === 'Replied') {
+    pipelineData[idx].nextStepBy = today.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+    pipelineData[idx].nextAction = 'Reply and propose a 15-min call';
+    // Unlock interview prep
+    unlockInterviewPrep();
+    notify('Reply logged! Interview Prep is now unlocked.');
+  } else if (newStatus === 'Call scheduled') {
+    pipelineData[idx].nextStepBy = today.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+    pipelineData[idx].nextAction = 'Prepare call brief — see Interview Prep tab';
+    unlockInterviewPrep();
+    notify('Call logged! Interview Prep is now unlocked.');
+  } else if (newStatus === 'No response — follow up') {
+    const followUp = new Date(today.getTime() + 2 * 24 * 60 * 60 * 1000);
+    pipelineData[idx].nextStepBy = followUp.toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+    pipelineData[idx].nextAction = 'Send follow-up — go to Outreach tab';
+  }
+
+  // Re-render
+  const tbody = document.getElementById('pipeline-tbody');
+  if (tbody) {
+    const panel = document.getElementById('mod-pipeline');
+    if (panel) panel.innerHTML = renderPipelineHTML();
+  }
+}
+
+function unlockInterviewPrep() {
+  const tab = document.getElementById('tab-interview');
+  if (tab) {
+    tab.classList.remove('mod-locked');
+    tab.innerHTML = '<span class="step-num">4</span> Interview Prep';
+  }
 }
 
 // ── CV REWRITE MODULE ──
@@ -967,10 +1340,11 @@ function renderCVRewriteOutput(cv) {
       <p style="font-size:12px;color:var(--muted);line-height:1.7">ATS systems can only filter what's written. If your CV doesn't say "no degree", it has nothing to reject. <strong style="color:var(--text)">Do not mention degree status anywhere on your CV.</strong> Lead with years of experience, certifications, and these achievement bullets. Most ATS systems will pass a CV scoring 70%+ on other criteria even if the degree field is blank.<br><br>If a job application has a knockout question "Do you have a degree? Yes/No" — skip that application and approach the company directly through LinkedIn instead. That bypasses the ATS entirely.<br><br>When asked in an interview: <em style="color:var(--text)">"I've built and run training programs across 3 countries over 15 years — I'm happy to walk you through the outcomes."</em> Don't apologise. Redirect to proof.</p>
     </div>
 
-    <div style="margin-top:.875rem">
-      <p style="font-family:'DM Mono',monospace;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin-bottom:.5rem">Copy everything at once</p>
-      <button class="btn-submit" onclick="copyFullCVSection()" style="width:100%">Copy Full CV Section</button>
-    </div>`;
+    <div style="margin-top:.875rem;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn-submit" onclick="downloadCVDoc()" style="flex:1">⬇ Download Word Document</button>
+      <button class="btn-secondary" onclick="copyFullCVSection()" style="flex:1">Copy All Text</button>
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin-top:.5rem;line-height:1.5">Single-column, Arial font, ATS-safe. Update the contact details and paste your existing experience section below the achievements.</p>`;
 }
 
 async function generateCVRewrite() {
@@ -1016,6 +1390,34 @@ function copyFullCVSection() {
   const bullets = (cv.top_bullets||[]).map(b => `• ${b}`).join('\n');
   const full = `HEADLINE\n${cv.target_headline||''}\n\nSUMMARY\n${cv.summary_paragraph||''}\n\nKEY ACHIEVEMENTS\n${bullets}`;
   navigator.clipboard.writeText(full).then(() => notify('Full CV section copied ✓'));
+}
+
+async function downloadCVDoc() {
+  const d = state.profileData;
+  if (!d?.cv_rewrite_context) { notify('Generate CV Rewrite first.'); return; }
+  showLoading('Generating your Word document...');
+  try {
+    const response = await fetch('/api/generate-cv', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ cv: d.cv_rewrite_context, profile: { name: d.name } })
+    });
+    if (!response.ok) throw new Error('Generation failed');
+    const blob = await response.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `HireOS_CV_${(d.name||'Professional').replace(/\s+/g,'_')}.docx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    hideLoading();
+    notify('CV downloaded ✓');
+  } catch(err) {
+    hideLoading();
+    notify('Download failed. Copy the text instead.');
+  }
 }
 
 function copyAllBullets() {
@@ -1106,6 +1508,8 @@ function clearFile() {
 // ── START OVER ──
 function startOver() {
   Object.assign(state, { cvText:'', messages:[], questionCount:0, profileData:null, profileDone:false, interview:{ questions:[], currentQ:0, evaluations:[] } });
+  pipelineData = [];
+  Object.assign(outreachState, { company:'', branch:'', hook:'', generatedMsg:'' });
   document.getElementById('chat-messages').innerHTML = `<div class="typing-indicator" id="typing"><div class="typing-avatar">H</div><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
   document.getElementById('file-selected').classList.remove('show');
   document.getElementById('start-btn').disabled = true;
